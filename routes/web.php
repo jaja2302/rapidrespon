@@ -27,9 +27,7 @@ Route::get('/', function () {
 
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
-})
-    ->name('dashboard');
-//    ->middleware(['auth', 'verified'])->name('dashboard');
+})->name('dashboard');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -46,4 +44,4 @@ Route::get('/uikit/button', function () {
 
 
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';
