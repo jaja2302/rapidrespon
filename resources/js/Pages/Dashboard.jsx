@@ -47,7 +47,6 @@ const Dashboard = (props) => {
                         <p>SULUNG RESEARCH STATION</p>
                     </div>
                 </div>
-                <div className="text-right"></div>
             </div>
         </React.Fragment>
     );
@@ -87,7 +86,6 @@ const Dashboard = (props) => {
                 <div className="card">
                     <Toolbar start={startContent} end={endContent} />
                     <div>
-                        Selected Option:{" "}
                         {setSelectedOption ? setSelectedOption.code : "None"}
                     </div>
                 </div>

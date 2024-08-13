@@ -18,7 +18,7 @@ export default function Selectoption({ options, onSelectChange }) {
     };
 
     return (
-        <div className="card flex justify-content-center">
+        <div className="flex justify-content-center ml-2 mr-2">
             <Dropdown
                 value={selectedRegion}
                 onChange={handleChange}
