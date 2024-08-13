@@ -15,7 +15,8 @@ import { PrimeReactContext } from "primereact/api";
 // import { usePathname, useSearchParams } from "next/navigation";
 
 const Layout = ({ children }) => {
-    const { layoutConfig, layoutState, setLayoutState } = useContext(LayoutContext);
+    const { layoutConfig, layoutState, setLayoutState } =
+        useContext(LayoutContext);
     const { setRipple } = useContext(PrimeReactContext);
     const topbarRef = useRef(null);
     const sidebarRef = useRef(null);
@@ -96,7 +97,9 @@ const Layout = ({ children }) => {
         } else {
             document.body.className = document.body.className.replace(
                 new RegExp(
-                    "(^|\\b)" + "blocked-scroll".split(" ").join("|") + "(\\b|$)",
+                    "(^|\\b)" +
+                        "blocked-scroll".split(" ").join("|") +
+                        "(\\b|$)",
                     "gi"
                 ),
                 " "
@@ -109,7 +112,10 @@ const Layout = ({ children }) => {
     });
 
     useEffect(() => {
-        if (layoutState.overlayMenuActive || layoutState.staticMenuMobileActive) {
+        if (
+            layoutState.overlayMenuActive ||
+            layoutState.staticMenuMobileActive
+        ) {
             bindMenuOutsideClickListener();
         }
 
@@ -150,7 +156,7 @@ const Layout = ({ children }) => {
                     <div className="layout-main">{children}</div>
                     <AppFooter />
                 </div>
-                <AppConfig />
+                {/* <AppConfig /> */}
                 <div className="layout-mask"></div>
             </div>
         </React.Fragment>

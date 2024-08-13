@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import Layout from "@/Layouts/layout/layout.jsx";
 import Selectoption from "@/Components/ui/Selectoption.jsx";
 import { Toolbar } from "primereact/toolbar";
@@ -6,16 +6,20 @@ import { Button } from "primereact/button";
 import { Head, Link, useForm } from "@inertiajs/react";
 import axios from "axios";
 import Datatablefilter from "@/Components/ui/Datatablefilter.jsx";
+import Modaldrag from "@/Components/ui/Modaldrag";
+import { LayoutContext } from "../Layouts/layout/context/layoutcontext";
+import { PrimeReactContext } from "primereact/api";
 const Dashboard = (props) => {
-    useEffect(() => {
-        // Access the data passed from the controller
-        // console.log(props.data);
-    }, []);
     const [selectedOption, setSelectedOption] = useState(null);
+    const [tableData, setTableData] = useState([]);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const { layoutConfig, setLayoutConfig, layoutState, setLayoutState } =
+        useContext(LayoutContext);
+    const { setRipple, changeTheme } = useContext(PrimeReactContext);
+
     const { data, setData, post } = useForm({
         id: "",
     });
-    const [tableData, setTableData] = useState([]);
 
     const handleSelectChange = async (value) => {
         setData("id", value);
@@ -27,6 +31,18 @@ const Dashboard = (props) => {
         } catch (errors) {
             console.error(errors);
         }
+    };
+
+    const openModal = () => {
+        setIsModalOpen(true);
+        setLayoutState((prevState) => ({
+            ...prevState,
+            configSidebarVisible: false,
+        }));
+    };
+
+    const closeModal = () => {
+        setIsModalOpen(false);
     };
 
     const startContent = (
@@ -85,11 +101,10 @@ const Dashboard = (props) => {
                 </div>
                 <div className="card">
                     <Toolbar start={startContent} end={endContent} />
-                    <div>
-                        {setSelectedOption ? setSelectedOption.code : "None"}
-                    </div>
+                    <div>{selectedOption ? selectedOption.code : "None"}</div>
                 </div>
-
+                <button onClick={openModal}>Open Draggable Modal</button>
+                <Modaldrag isOpen={isModalOpen} onRequestClose={closeModal} />
                 <Datatablefilter data={tableData} />
             </div>
         </Layout>

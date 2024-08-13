@@ -9,6 +9,7 @@ export default function Datatablefilter({ data }) {
                 <DataTable
                     value={data}
                     scrollable
+                    className="z-0"
                     scrollHeight="400px"
                     style={{ minWidth: "50rem" }}
                     paginator

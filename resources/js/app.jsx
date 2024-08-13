@@ -7,6 +7,7 @@ import "primeicons/primeicons.css";
 import "primeflex/primeflex.css";
 
 import "../css/layout.css";
+import "../css/app.css";
 // import "/node_modules/primeflex/primeflex.css";
 
 import { createRoot } from "react-dom/client";
@@ -15,7 +16,7 @@ import { resolvePageComponent } from "laravel-vite-plugin/inertia-helpers";
 import { LayoutProvider } from "@/Layouts/layout/context/layoutcontext.jsx";
 import { PrimeReactProvider } from "primereact/api";
 
-const appName = import.meta.env.VITE_APP_NAME || "Laravel";
+const appName = import.meta.env.VITE_APP_NAME || "Rapid Response";
 
 createInertiaApp({
     title: (title) => `${title} - ${appName}`,
