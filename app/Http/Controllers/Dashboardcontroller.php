@@ -50,4 +50,16 @@ class Dashboardcontroller extends Controller
 
         return response()->json(['data' => $data]);
     }
+
+    public function detailData(Request $request)
+    {
+        $id = $request->input('id');
+        // dd($id);
+
+        $data = MutuTransport::where('id', $id)->first();
+
+        // dd($data);
+
+        return response()->json(['data' => $data]);
+    }
 }

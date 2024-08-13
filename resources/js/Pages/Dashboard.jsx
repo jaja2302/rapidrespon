@@ -6,9 +6,11 @@ import { Button } from "primereact/button";
 import { Head, Link, useForm } from "@inertiajs/react";
 import axios from "axios";
 import Datatablefilter from "@/Components/ui/Datatablefilter.jsx";
-import Modaldrag from "@/Components/ui/Modaldrag";
 import { LayoutContext } from "../Layouts/layout/context/layoutcontext";
 import { PrimeReactContext } from "primereact/api";
+import { Calendar } from "primereact/calendar";
+import { FloatLabel } from "primereact/floatlabel";
+
 const Dashboard = (props) => {
     const [selectedOption, setSelectedOption] = useState(null);
     const [tableData, setTableData] = useState([]);
@@ -26,23 +28,11 @@ const Dashboard = (props) => {
 
         try {
             const response = await axios.post(route("get-data"), { id: value });
-            console.log("success", response.data);
+            // console.log("success", response.data);
             setTableData(response.data.data);
         } catch (errors) {
             console.error(errors);
         }
-    };
-
-    const openModal = () => {
-        setIsModalOpen(true);
-        setLayoutState((prevState) => ({
-            ...prevState,
-            configSidebarVisible: false,
-        }));
-    };
-
-    const closeModal = () => {
-        setIsModalOpen(false);
     };
 
     const startContent = (
@@ -73,6 +63,16 @@ const Dashboard = (props) => {
                 options={props.data}
                 onSelectChange={handleSelectChange}
             />
+            <div className="card flex justify-content-center">
+                <FloatLabel>
+                    <Calendar
+                        inputId="birth_date"
+                        value={date}
+                        onChange={(e) => setDate(e.value)}
+                    />
+                    <label htmlFor="birth_date">Birth Date</label>
+                </FloatLabel>
+            </div>
             <Button
                 label="Download Ba"
                 icon="pi pi-download"
@@ -80,7 +80,7 @@ const Dashboard = (props) => {
             />
         </React.Fragment>
     );
-
+    const [date, setDate] = useState(null);
     return (
         <Layout>
             <div className="p-4">
@@ -103,8 +103,6 @@ const Dashboard = (props) => {
                     <Toolbar start={startContent} end={endContent} />
                     <div>{selectedOption ? selectedOption.code : "None"}</div>
                 </div>
-                <button onClick={openModal}>Open Draggable Modal</button>
-                <Modaldrag isOpen={isModalOpen} onRequestClose={closeModal} />
                 <Datatablefilter data={tableData} />
             </div>
         </Layout>
