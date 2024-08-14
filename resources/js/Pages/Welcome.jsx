@@ -8,7 +8,7 @@ import { Head, Link, useForm } from "@inertiajs/react";
 import { InputText } from "primereact/inputtext";
 import { Skeleton } from "primereact/skeleton";
 
-export default function Login({ status, canResetPassword }) {
+export default function Login({ status, canResetPassword, auth }) {
     const { data, setData, post, processing, errors, reset } = useForm({
         email: "",
         password: "",

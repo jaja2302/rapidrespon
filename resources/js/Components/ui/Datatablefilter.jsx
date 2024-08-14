@@ -26,7 +26,7 @@ export default function Datatablefilter({ data }) {
             <Button
                 label="Detail"
                 className="p-button-sm p-button-text"
-                onClick={() => handleDetailClick(rowData)} // Open modal with the row data
+                onClick={() => handleDetailClick(rowData)}
             />
         );
     };
