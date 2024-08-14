@@ -1,16 +1,27 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Dropdown } from "primereact/dropdown";
 
 export default function Selectoption({ options, onSelectChange }) {
-    const [selectedRegion, setSelectedRegion] = useState(null);
+    // Find the default selected region ID
+    const defaultRegionId = 1;
 
-    // console.log(options);
+    // Initialize the state with the default ID
+    const [selectedRegion, setSelectedRegion] = useState(defaultRegionId);
+
+    useEffect(() => {
+        // Update the selectedRegion if options change and include defaultRegionId
+        const defaultOption = options.find(
+            (option) => option.id === defaultRegionId
+        );
+        if (defaultOption) {
+            setSelectedRegion(defaultOption);
+        }
+    }, [options]);
 
     const formattedOptions = options.map((option) => ({
         name: option.nama,
         code: option.id,
     }));
-    // console.log(formattedOptions);
 
     const handleChange = (e) => {
         setSelectedRegion(e.value);
@@ -18,7 +29,7 @@ export default function Selectoption({ options, onSelectChange }) {
     };
 
     return (
-        <div className="flex justify-content-center ml-2 mr-2">
+        <div className="flex justify-content-center mr-2">
             <Dropdown
                 value={selectedRegion}
                 onChange={handleChange}

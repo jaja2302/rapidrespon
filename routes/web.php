@@ -34,8 +34,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-    Route::post('get-data', [DashboardController::class, 'getData'])->name('get-data');
-    Route::post('detailData', [DashboardController::class, 'detailData'])->name('detailData');
+    Route::get('get-data', [DashboardController::class, 'getData'])->name('get-data');
+    Route::get('detailData', [DashboardController::class, 'detailData'])->name('detailData');
+    Route::get('filterrData', [DashboardController::class, 'filterrData'])->name('filterrData');
 });
 
 

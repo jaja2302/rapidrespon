@@ -6,18 +6,18 @@ import Getmodal from "./Getmodal";
 
 export default function Datatablefilter({ data }) {
     const [isModalOpen, setIsModalOpen] = useState(false); // Modal visibility state
-    const [selectedId, setSelectedId] = useState(null); // State to hold the selected row's ID
+    const [selectedData, setSelectedData] = useState(null); // State to hold the selected row's data
 
     // Event handler for the Detail button click
     const handleDetailClick = (rowData) => {
-        setSelectedId(rowData.id); // Set the selected row's ID
+        setSelectedData(rowData);
         setIsModalOpen(true); // Open the modal
     };
 
     // Close modal function
     const closeModal = () => {
         setIsModalOpen(false);
-        setSelectedId(null); // Reset the selected ID when the modal is closed
+        setSelectedData(null);
     };
 
     // Template for rendering the Detail button
@@ -26,7 +26,7 @@ export default function Datatablefilter({ data }) {
             <Button
                 label="Detail"
                 className="p-button-sm p-button-text"
-                onClick={() => handleDetailClick(rowData)} // Open modal with the row ID
+                onClick={() => handleDetailClick(rowData)} // Open modal with the row data
             />
         );
     };
@@ -34,43 +34,60 @@ export default function Datatablefilter({ data }) {
     return (
         <div className="card">
             {data.length > 0 ? (
-                <DataTable
-                    value={data}
-                    scrollable
-                    className="z-0"
-                    scrollHeight="400px"
-                    style={{ minWidth: "50rem" }}
-                    paginator
-                    rows={25}
-                    rowsPerPageOptions={[5, 10, 25, 50]}
-                >
-                    <Column field="estate" header="Estate"></Column>
-                    <Column
-                        field="afdeling"
-                        header="Afdeling"
-                        sortable
-                        style={{ width: "25%" }}
-                    ></Column>
-                    <Column field="blok" header="Blok"></Column>
-                    <Column field="petugas" header="Petugas"></Column>
-                    <Column field="datetime" header="Datetime"></Column>
-                    <Column field="tph_baris" header="TPH Baris"></Column>
-                    <Column field="status_panen" header="Status Panen"></Column>
-                    <Column field="luas_blok" header="Luas Blok"></Column>
-                    <Column
-                        body={detailButtonTemplate}
-                        style={{ width: "10rem" }}
-                    ></Column>
-                </DataTable>
+                <div style={{ overflowX: "auto" }}>
+                    <DataTable
+                        value={data}
+                        scrollable
+                        scrollHeight="500px"
+                        style={{ minWidth: "50rem" }}
+                        tableStyle={{ minWidth: "50rem" }}
+                    >
+                        <Column
+                            field="estate"
+                            header="Estate"
+                            style={{ minWidth: "100px" }}
+                        ></Column>
+                        <Column
+                            field="afdeling"
+                            header="Afdeling"
+                            sortable
+                            style={{ width: "25%", minWidth: "150px" }}
+                        ></Column>
+                        <Column
+                            field="blok"
+                            header="Blok"
+                            style={{ minWidth: "100px" }}
+                        ></Column>
+                        <Column
+                            field="restan"
+                            header="Restan"
+                            style={{ minWidth: "100px" }}
+                        ></Column>
+                        <Column
+                            field="brondol"
+                            header="Brondol"
+                            style={{ minWidth: "150px" }}
+                        ></Column>
+                        <Column
+                            field="total"
+                            header="Total"
+                            style={{ minWidth: "150px" }}
+                        ></Column>
+                        <Column
+                            body={detailButtonTemplate}
+                            style={{ width: "10rem", minWidth: "100px" }}
+                        ></Column>
+                    </DataTable>
+                </div>
             ) : (
                 <p>No data available</p>
             )}
 
-            {/* Render the modal and pass the selected ID */}
+            {/* Render the modal and pass the selected data */}
             <Getmodal
                 isOpen={isModalOpen}
                 onRequestClose={closeModal}
-                selectedId={selectedId}
+                selectedData={selectedData} // Pass the entire row data
             />
         </div>
     );
