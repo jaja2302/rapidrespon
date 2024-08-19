@@ -5,6 +5,7 @@ import axios from "axios";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { Dropdown } from "primereact/dropdown";
+import { Tag } from "primereact/tag";
 
 export default function Getmodal({ isOpen, onRequestClose, selectedData }) {
     const [detailData, setDetailData] = useState([]); // State to store API response
@@ -61,6 +62,7 @@ export default function Getmodal({ isOpen, onRequestClose, selectedData }) {
             <span className="font-bold white-space-nowrap">
                 Detail Estate: {selectedData ? selectedData.estate : "N/A"}
             </span>
+            <Tag value="Verif"></Tag>
         </div>
     );
 

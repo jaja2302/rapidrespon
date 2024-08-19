@@ -49,8 +49,8 @@ const Dashboard = (props) => {
 
     const startContent = (
         <React.Fragment>
-            <div className="grid">
-                <div className="col-6">
+            <div className="grid grid-cols-3 gap-4">
+                <div className="col-span-1">
                     <img
                         src="images/srs/Logo-SSS.png"
                         width="150px"
@@ -59,7 +59,7 @@ const Dashboard = (props) => {
                         className="w-24 h-24 mr-4"
                     />
                 </div>
-                <div className="col-6">
+                <div className="col-span-1">
                     <p> PT. SAWIT SUMBERMAS SARANA, TBK</p>
                     <p>SULUNG RESEARCH STATION</p>
                 </div>
