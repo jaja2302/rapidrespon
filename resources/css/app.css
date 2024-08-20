@@ -1,6 +1,5 @@
-/* @tailwind base;*/
-/*@tailwind components;*/
-/*@tailwind utilities;*/
+
+
 .flexible-modal {
     position: absolute;
     /* z-index: 99; */
@@ -34,3 +33,7 @@
     top: 0;
     cursor: move;
 }
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;

@@ -21,11 +21,21 @@
         "vite": "^4.5.3"
     },
     "dependencies": {
+        "@radix-ui/react-label": "^2.1.0",
+        "@radix-ui/react-slot": "^1.1.0",
+        "@tabler/icons-react": "^3.12.0",
         "chart.js": "^4.4.0",
+        "class-variance-authority": "^0.7.0",
+        "clsx": "^2.1.1",
+        "framer-motion": "^11.3.28",
+        "lucide-react": "^0.428.0",
+        "mini-svg-data-uri": "^1.4.4",
         "primeflex": "^3.3.1",
         "primeicons": "^6.0.1",
         "primereact": "^10.8.2",
         "react-modal-resizable-draggable": "^0.1.6",
-        "react-transition-group": "^4.4.5"
+        "react-transition-group": "^4.4.5",
+        "tailwind-merge": "^2.5.2",
+        "tailwindcss-animate": "^1.0.7"
     }
 }
