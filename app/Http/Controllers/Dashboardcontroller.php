@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Estate;
 use App\Models\Jenistanah;
+use App\Models\Laporanrr;
 use App\Models\MutuTransport;
 use App\Models\Regional;
 use App\Models\Wilayah;
@@ -29,7 +30,7 @@ class Dashboardcontroller extends Controller
     {
         $id = $request->input('id');
         $tanggal = Carbon::parse($request->input('tanggal'))->format('Y-m');
-        // dd($tanggal, $id);
+        // dd($tanggal, $id, $request->input('tanggal'));
         // $reg = $id['code'];
 
         // Fetch Wilayah records with related estates
@@ -49,28 +50,30 @@ class Dashboardcontroller extends Controller
 
 
         // Fetch data from Jenistanah (this part is independent of the above code)
-        $data = MutuTransport::wherein('estate', $nama_estate)->where('datetime', 'like', '%' . $tanggal . '%')->orderBy('estate')->get();
+        $data = Laporanrr::wherein('estate', $nama_estate)
+            ->where('datetime', 'like', '%' . $tanggal . '%')
+            ->with('Jenistanah', 'Topografi', 'Solum')
+            ->orderBy('estate')->get();
+
+        // dd($data);
 
         $groupedData = $data->groupBy(['estate', 'afdeling'])->toArray();
+
+        // dd($groupedData);
 
         $result = [];
         foreach ($groupedData as $estate => $afdelingData) {
             foreach ($afdelingData as $afdeling => $data) {
-                $rst = 0;
-                $bt = 0;
+                $masalah = 0;
                 $blok = count($data);
                 foreach ($data as $val => $value) {
-                    $rst += $value['rst'];
-                    $bt += $value['bt'];
+                    $masalah += $value['masalah'];
                 }
-                $total = $rst + $bt;
 
                 $result[] = [
                     'estate' => $estate,
                     'afdeling' => $afdeling,
-                    'restan' => $rst,
-                    'brondol' => $bt,
-                    'total' => $total,
+                    'masalah' => $masalah,
                     'blok' => $blok,
                     'date' => $tanggal
                 ];
@@ -89,7 +92,7 @@ class Dashboardcontroller extends Controller
         // dd($estate, $afdeling, $date);
 
 
-        $data = MutuTransport::where('estate', $estate)
+        $data = Laporanrr::where('estate', $estate)
             ->where('afdeling', $afdeling)
             ->where('datetime', 'like', '%' . $date . '%')
             ->select(
@@ -97,18 +100,8 @@ class Dashboardcontroller extends Controller
                 'afdeling',
                 DB::raw("DATE_FORMAT(datetime, '%Y-%m-%d') as date")
             )
-            ->groupBy('date')
             ->pluck('date')->toArray();
-
-        // $data = MutuTransport::where('estate', $estate)
-        //     ->where('afdeling', $afdeling)
-        //     ->where('datetime', 'like', '%' . $date . '%')
-        //     ->select(
-        //         'estate',
-        //         'afdeling',
-        //         DB::raw("DATE_FORMAT(datetime, '%Y-%m-%d') as date")
-        //     )->get()->toArray();
-        // dd($data, $date);
+        // dd($data);
         return response()->json(['data' => $data]);
     }
 
@@ -118,9 +111,10 @@ class Dashboardcontroller extends Controller
         $afdeling = $request->input('afdeling');
         $date = $request->input('date');
 
-        $data = MutuTransport::where('estate', $estate)
+        $data = Laporanrr::where('estate', $estate)
             ->where('afdeling', $afdeling)
             ->where('datetime', 'like', '%' . $date . '%')
+            ->with('Jenistanah', 'Topografi', 'Solum', 'Masalah', 'Rekomendasi')
             ->get()->toArray();
 
         // dd($data);

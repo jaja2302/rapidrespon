@@ -14,10 +14,16 @@ export default function Getmodal({ isOpen, onRequestClose, selectedData }) {
     const [datedata, setDatedata] = useState([]); // State for dropdown options
     const [selectedDate, setSelectedDate] = useState(null); // State for selected date
 
+    // Reset datedata and selectedDate when selectedData changes
     useEffect(() => {
         if (selectedData && isOpen) {
+            setDatedata([]); // Clear the dropdown options
+            setSelectedDate(null); // Clear the selected date
+            setDetailData([]); // Clear the detail data
             setLoading(true);
             setError(null);
+            
+            // Fetch new dates based on selectedData
             axios
                 .get(route("filterrData"), {
                     params: {
@@ -37,7 +43,7 @@ export default function Getmodal({ isOpen, onRequestClose, selectedData }) {
                     console.error(error);
                 });
         }
-    }, [selectedData, isOpen]);
+    }, [selectedData, isOpen]); // Trigger effect when selectedData or isOpen changes
 
     const handleSelectChange = async (e) => {
         const selectedValue = e.value;
@@ -84,7 +90,6 @@ export default function Getmodal({ isOpen, onRequestClose, selectedData }) {
                 modal
                 header={headerElement}
                 footer={footerContent}
-                // style={{ width: "100rem" }}
                 style={{ width: "80rem" }}
                 breakpoints={{ "960px": "65vw", "641px": "90vw" }}
                 onHide={onRequestClose}
@@ -101,54 +106,94 @@ export default function Getmodal({ isOpen, onRequestClose, selectedData }) {
                 />
 
                 <DataTable
-                    value={detailData}
-                    scrollable
-                    scrollHeight="500px"
-                    style={{ minWidth: "50rem" }}
-                    rows={25}
-                    tableStyle={{ minWidth: "50rem" }}
+                value={detailData}
+                scrollable
+                scrollHeight="500px"
+                style={{ minWidth: "50rem" }}
+                rows={25}
+                tableStyle={{ minWidth: "50rem" }}
                 >
-                    <Column
-                        field="estate"
-                        header="Estate"
-                        style={{ minWidth: "100px" }}
-                    />
-                    <Column
-                        field="afdeling"
-                        header="Afdeling"
-                        sortable
-                        style={{ width: "25%", minWidth: "150px" }}
-                    />
-                    <Column
-                        field="blok"
-                        header="Blok"
-                        style={{ minWidth: "100px" }}
-                    />
-                    <Column
-                        field="petugas"
-                        header="Petugas"
-                        style={{ minWidth: "100px" }}
-                    />
-                    <Column
-                        field="datetime"
-                        header="Datetime"
-                        style={{ minWidth: "150px" }}
-                    />
-                    <Column
-                        field="tph_baris"
-                        header="TPH Baris"
-                        style={{ minWidth: "150px" }}
-                    />
-                    <Column
-                        field="status_panen"
-                        header="Status Panen"
-                        style={{ minWidth: "150px" }}
-                    />
-                    <Column
-                        field="luas_blok"
-                        header="Luas Blok"
-                        style={{ minWidth: "150px" }}
-                    />
+                <Column
+                    field="estate"
+                    header="Estate"
+                    style={{ minWidth: "100px" }}
+                />
+                <Column
+                    field="afdeling"
+                    header="Afdeling"
+                    sortable
+                    style={{ width: "25%", minWidth: "150px" }}
+                />
+                <Column
+                    field="blok"
+                    header="Blok"
+                    style={{ minWidth: "100px" }}
+                />
+                <Column
+                    field="datetime"
+                    header="Datetime"
+                    style={{ minWidth: "150px" }}
+                />
+                <Column
+                    field="jenistanah.nama_jenis_tanah"
+                    header="Jenis Tanah"
+                    style={{ minWidth: "150px" }}
+                />
+                <Column
+                    field="topografi.nama_topografi"
+                    header="Topografi"
+                    style={{ minWidth: "150px" }}
+                />
+                <Column
+                    field="solum.nama_solum"
+                    header="Solum"
+                    style={{ minWidth: "150px" }}
+                />
+                <Column
+                    field="baris"
+                    header="Baris"
+                    style={{ minWidth: "150px" }}
+                />
+                <Column
+                    field="no_pkk"
+                    header="No Pokok"
+                    style={{ minWidth: "150px" }}
+                />
+                <Column
+                    field="verifikator1"
+                    header="Verifikator 1"
+                    style={{ minWidth: "150px" }}
+                />
+                <Column
+                    field="verifikator2"
+                    header="Verifikator 2"
+                    style={{ minWidth: "150px" }}
+                />
+                <Column
+                    field="Pedamping"
+                    header="Pedamping"
+                    style={{ minWidth: "150px" }}
+                />
+                <Column
+                    field="subjek"
+                    header="Subjek"
+                    style={{ minWidth: "150px" }}
+                />
+                <Column
+                    field="masalah.nama_masalah"
+                    header="Masalah"
+                    style={{ minWidth: "150px" }}
+                />
+                <Column
+                    field="rekomendasi.nama_rekomendasi"
+                    header="Rekomendasi"
+                    style={{ minWidth: "150px" }}
+                />
+                <Column
+                    field="catatan"
+                    header="Catatan"
+                    style={{ minWidth: "150px" }}
+                />
                 </DataTable>
             </Dialog>
         </div>

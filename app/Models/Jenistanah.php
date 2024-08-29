@@ -9,4 +9,9 @@ class Jenistanah extends Model
 {
     use HasFactory;
     protected $table = 'jenis_tanah';
+
+    public function Jenistanah()
+    {
+        return $this->hasMany(Laporanrr::class, 'jenis_tanah', 'id');
+    }
 }

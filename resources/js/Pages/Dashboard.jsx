@@ -25,20 +25,24 @@ const Dashboard = (props) => {
     });
 
     const handleSelectChange = async (option, dateValue) => {
-        // console.log("clicked");
-
         setSelectedOption(option);
-        // console.log(option["code"]);
-
         setDate(dateValue);
-
-        setData("id", option, "date", dateValue);
-
+    
+        // Manually format the date to 'YYYY-MM-DD' in local time
+        const year = dateValue.getFullYear();
+        const month = (dateValue.getMonth() + 1).toString().padStart(2, '0'); // Months are 0-indexed in JS
+        const day = dateValue.getDate().toString().padStart(2, '0'); // Get the day of the month
+    
+        const formattedDate = `${year}-${month}-${day}`;
+        // console.log(formattedDate);
+    
+        setData("id", option, "date", formattedDate);
+    
         try {
             const response = await axios.get(route("get-data"), {
                 params: {
                     id: option["code"],
-                    tanggal: dateValue,
+                    tanggal: formattedDate,
                 },
             });
             setTableData(response.data.data);
@@ -46,6 +50,8 @@ const Dashboard = (props) => {
             console.error(errors);
         }
     };
+    
+    
 
     const startContent = (
         <React.Fragment>

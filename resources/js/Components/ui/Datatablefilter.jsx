@@ -54,24 +54,19 @@ export default function Datatablefilter({ data }) {
                             style={{ width: "25%", minWidth: "150px" }}
                         ></Column>
                         <Column
+                            field="masalah"
+                            header="Masalah"
+                            style={{ minWidth: "100px" }}
+                        ></Column>
+                        <Column
                             field="blok"
-                            header="Blok"
+                            header="Jumlah Blok"
                             style={{ minWidth: "100px" }}
                         ></Column>
-                        <Column
-                            field="restan"
-                            header="Restan"
+                         <Column
+                            field="date"
+                            header="Date"
                             style={{ minWidth: "100px" }}
-                        ></Column>
-                        <Column
-                            field="brondol"
-                            header="Brondol"
-                            style={{ minWidth: "150px" }}
-                        ></Column>
-                        <Column
-                            field="total"
-                            header="Total"
-                            style={{ minWidth: "150px" }}
                         ></Column>
                         <Column
                             body={detailButtonTemplate}
