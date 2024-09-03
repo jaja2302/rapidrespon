@@ -54,63 +54,45 @@ const Dashboard = (props) => {
     
 
     const startContent = (
-        <React.Fragment>
-            <div className="grid grid-cols-3 gap-4">
-                <div className="col-span-1">
-                    <img
-                        src="images/srs/Logo-SSS.png"
-                        width="150px"
-                        height={"100px"}
-                        alt="Company Logo"
-                        className="w-24 h-24 mr-4"
-                    />
-                </div>
-                <div className="col-span-1">
-                    <p> PT. SAWIT SUMBERMAS SARANA, TBK</p>
-                    <p>SULUNG RESEARCH STATION</p>
-                </div>
+        <div className="flex flex-col md:flex-row items-center md:items-start md:border-red-50">
+            <img
+                src="images/srs/Logo-SSS.png"
+                width="120px"  // Reduced size for better mobile fit
+                height="140px" // Reduced size for better mobile fit
+                alt="Company Logo"
+                className="mb-2 md:mb-0 md:mr-4"
+            />
+            <div className="text-center md:text-left">
+                <p className="text-sm md:text-lg font-semibold">
+                    PT. SAWIT SUMBERMAS SARANA, TBK
+                </p>
+                <p className="text-xs md:text-sm text-gray-600">
+                    SULUNG RESEARCH STATION
+                </p>
             </div>
-        </React.Fragment>
+        </div>
     );
-
+    
     const endContent = (
-        <React.Fragment>
-            <div className="grid grid-cols-3 gap-4">
-                <div className="col-span-1">
-                    <Selectoption
-                        style={{ width: "80px" }}
-                        options={props.data}
-                        onSelectChange={(value) =>
-                            handleSelectChange(value, date)
-                        }
-                    />
-                </div>
-                <div className="col-span-1">
-                    <FloatLabel>
-                        <Calendar
-                            value={date}
-                            style={{ width: "150px" }}
-                            className="mr-2"
-                            onChange={(e) =>
-                                handleSelectChange(selectedOption, e.value)
-                            }
-                            view="month"
-                            dateFormat="mm/yy"
-                        />
-                        <label htmlFor="tanggal">Bulan</label>
-                    </FloatLabel>
-                </div>
-                <div className="col-span-1">
-                    <Button
-                        label="Download Ba"
-                        icon="pi pi-download"
-                        className="p-button-success"
-                    />
-                </div>
-            </div>
-        </React.Fragment>
+        <div className="flex flex-col md:flex-row items-center gap-4">
+            <Selectoption
+                style={{ width: "100%", maxWidth: "150px" }} // Adjust width for mobile
+                options={props.data}
+                onSelectChange={(value) => handleSelectChange(value, date)}
+            />
+            <FloatLabel>
+                <Calendar
+                    value={date}
+                    style={{ width: "100%", maxWidth: "150px" }} // Adjust width for mobile
+                    className="mt-2 md:mt-0 md:mr-2"
+                    onChange={(e) => handleSelectChange(selectedOption, e.value)}
+                    view="month"
+                    dateFormat="mm/yy"
+                />
+            </FloatLabel>
+        </div>
     );
-
+    
     return (
         <Layout>
             <div className="grid">
@@ -126,6 +108,7 @@ const Dashboard = (props) => {
             <Datatablefilter data={tableData} />
         </Layout>
     );
+    
 };
 
 export default Dashboard;
