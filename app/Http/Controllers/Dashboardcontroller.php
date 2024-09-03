@@ -3,10 +3,16 @@
 namespace App\Http\Controllers;
 
 use App\Models\Estate;
+use App\Models\Jabatan;
 use App\Models\Jenistanah;
 use App\Models\Laporanrr;
+use App\Models\Masalah;
 use App\Models\MutuTransport;
+use App\Models\Pengguna;
 use App\Models\Regional;
+use App\Models\Rekomendasi;
+use App\Models\Solum;
+use App\Models\Topografi;
 use App\Models\Wilayah;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -66,8 +72,16 @@ class Dashboardcontroller extends Controller
             foreach ($afdelingData as $afdeling => $data) {
                 $masalah = 0;
                 $blok = count($data);
-                foreach ($data as $val => $value) {
-                    $masalah += $value['masalah'];
+                foreach ($data as $value) {
+                    // Check if 'masalah' contains a '$' and handle accordingly
+                    if (strpos($value['masalah'], '$') !== false) {
+                        // Explode by '$' and count the resulting parts
+                        $masalahParts = explode('$', $value['masalah']);
+                        $masalah += count($masalahParts);
+                    } else {
+                        // Ensure 'masalah' is treated as an integer
+                        $masalah += intval($value['masalah']);
+                    }
                 }
 
                 $result[] = [
@@ -79,6 +93,7 @@ class Dashboardcontroller extends Controller
                 ];
             }
         }
+
         // dd($result);
 
         return response()->json(['data' => $result]);
@@ -114,11 +129,38 @@ class Dashboardcontroller extends Controller
         $data = Laporanrr::where('estate', $estate)
             ->where('afdeling', $afdeling)
             ->where('datetime', 'like', '%' . $date . '%')
-            ->with('Jenistanah', 'Topografi', 'Solum', 'Masalah', 'Rekomendasi')
+            ->with('Jenistanah', 'Topografi', 'Solum', 'Masalah', 'Rekomendasi', 'nama_rekomendator', 'nama_verifikator1', 'nama_verifikator2')
             ->get()->toArray();
 
-        // dd($data);
 
+        return response()->json(['data' => $data]);
+    }
+
+    public function getDatainduk(Request $request)
+    {
+        $jenistanah = Jenistanah::all();
+        $topografi = Topografi::all();
+        $solum = Solum::all();
+        $masalah = Masalah::all();
+        $rekomendasi = Rekomendasi::all();
+        $rekomendator = Pengguna::whereIn('id_departement', [1, 39, 42, 40])
+            ->whereIn('id_jabatan', [29, 32, 28, 26, 25, 22, 21, 20, 19])
+            ->select('user_id as id', 'nama_lengkap as nama_rekomendator')
+            ->get();
+
+        // Fetch specific data from 'jabatan' table from another database connection
+        $pendamping = Jabatan::whereIn('id', [1, 5, 6, 7, 9, 18])
+            ->select('id', 'nama as nama_jabatan')
+            ->get();
+        $data = [
+            'jenistanah' => $jenistanah,
+            'topografi' => $topografi,
+            'solum' => $solum,
+            'masalah' => $masalah,
+            'rekomendasi' => $rekomendasi,
+            'rekomendator' => $rekomendator,
+            'pendamping' => $pendamping,
+        ];
         return response()->json(['data' => $data]);
     }
 }

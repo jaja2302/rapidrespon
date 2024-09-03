@@ -41,6 +41,7 @@ Route::middleware('auth')->group(function () {
     Route::get('get-data', [DashboardController::class, 'getData'])->name('get-data');
     Route::get('detailData', [DashboardController::class, 'detailData'])->name('detailData');
     Route::get('filterrData', [DashboardController::class, 'filterrData'])->name('filterrData');
+    Route::get('getDatainduk', [DashboardController::class, 'getDatainduk'])->name('getDatainduk');
 });
 
 

@@ -12,6 +12,16 @@ class Pengguna  extends Authenticatable
     use HasFactory, Notifiable;
     protected $table = 'pengguna';
     protected $primaryKey = 'user_id';
-    protected $connection = 'mysql2'; // Add this line to set the connection explicitly
+    protected $connection = 'mysql2';
     public $timestamps = false;
+
+    public function Departement()
+    {
+        return $this->belongsTo(Departement::class, 'id_departement', 'id');
+    }
+
+    public function Jabatan()
+    {
+        return $this->belongsTo(Jabatan::class, 'id_jabatan', 'id');
+    }
 }

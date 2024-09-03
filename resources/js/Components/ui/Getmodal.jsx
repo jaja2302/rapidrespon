@@ -5,6 +5,7 @@ import axios from "axios";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { Dropdown } from "primereact/dropdown";
+import { InputText } from "primereact/inputtext";
 import { Tag } from "primereact/tag";
 
 export default function Getmodal({ isOpen, onRequestClose, selectedData }) {
@@ -13,14 +14,22 @@ export default function Getmodal({ isOpen, onRequestClose, selectedData }) {
     const [error, setError] = useState(null); // State to handle errors
     const [datedata, setDatedata] = useState([]); // State for dropdown options
     const [selectedDate, setSelectedDate] = useState(null); // State for selected date
-    // const [status, setStatus] = useState("N/A"); // State for status
+  
+    const [jenisTanahOptions, setJenisTanahOptions] = useState([]);
+    const [topografiOptions, setTopografiOptions] = useState([]);
+    const [solumOptions, setSolumOptions] = useState([]);
+    const [masalahOptions, setMasalahOptions] = useState([]);
+    const [rekomendasiOptions, setRekomendasiOptions] = useState([]);
+    const [rekomedatorOptions, setRekomedatorOptions] = useState([]);
+    const [pendampingOptions, setPendampingOptions] = useState([]);
+    const [imageModalVisible, setImageModalVisible] = useState(false);
+    const [selectedImage, setSelectedImage] = useState(null);
 
     useEffect(() => {
         if (selectedData && isOpen) {
             setDatedata([]); // Clear the dropdown options
             setSelectedDate(null); // Clear the selected date
             setDetailData([]); // Clear the detail data
-            // setStatus("N/A"); // Clear the status
             setLoading(true);
             setError(null);
 
@@ -43,8 +52,9 @@ export default function Getmodal({ isOpen, onRequestClose, selectedData }) {
                     setLoading(false);
                     console.error(error);
                 });
+                getDatainduk();
         }
-    }, [selectedData, isOpen]); // Trigger effect when selectedData or isOpen changes
+    }, [selectedData, isOpen]);
 
     const handleSelectChange = async (e) => {
         const selectedValue = e.value;
@@ -59,44 +69,241 @@ export default function Getmodal({ isOpen, onRequestClose, selectedData }) {
                 },
             });
 
-            // Update detail data and status
+            // Update detail data
             const detail = response.data.data;
             setDetailData(detail);
-            // setStatus(detail.status || "N/A");
-            // console.log(detail);
-            
         } catch (errors) {
             console.error(errors);
         }
     };
 
-    const headerElement = (
-        <div className="inline-flex align-items-center justify-content-center gap-2">
-            <span className="font-bold white-space-nowrap">
-                Detail Estate: {selectedData ? selectedData.estate : "N/A"}
-            </span>
-           
-        </div>
-    );
+    const onRowEditComplete = (e) => {
+        let updatedData = [...detailData];
+        let { newData, index } = e;
 
-    const footerContent = (
-        <div>
-            <Button
-                label="Ok"
-                icon="pi pi-check"
-                onClick={onRequestClose}
-                autoFocus
+        updatedData[index] = newData;
+
+        setDetailData(updatedData);
+        
+        console.log(updatedData);
+        
+    };
+
+    const textEditor = (options) => {
+        return <InputText type="text" value={options.value} onChange={(e) => options.editorCallback(e.target.value)} />;
+    };
+  
+    const afdelingEditor = (options) => {
+        const afdelingOptions = [
+            { label: 'OA', value: 'OA' },
+            { label: 'OB', value: 'OB' },
+            { label: 'OC', value: 'OC' },
+            { label: 'OD', value: 'OD' },
+        ];
+        return (
+            <Dropdown
+                value={options.value}
+                options={afdelingOptions}
+                onChange={(e) => options.editorCallback(e.value)}
+                placeholder="Select Afdeling"
             />
-        </div>
-    );
+        );
+    };
+
+    const getDatainduk = async () => {
+        try {
+            const response = await axios.get(route("getDatainduk"));
+            const detail = response.data.data;
+            
+            // console.log(detail);
+            
+            // Assuming the API returns jenis tanah data in the correct format
+            const jenisTanahOptions = detail.jenistanah
+            const topografi = detail.topografi
+            const solum = detail.solum
+            const masalah = detail.masalah
+            const rekomendasi = detail.rekomendasi
+            const rekomendator = detail.rekomendator
+            const pendamping = detail.pendamping
+             // Assuming the API returns jenis tanah data in the correct format
+            const options = jenisTanahOptions.map(item => ({
+                value: item.id,
+                label: item.nama_jenis_tanah
+            }));
+
+            const topografiOptions = topografi.map(item => ({
+                value: item.id,
+                label: item.nama_topografi
+            }));
+
+            const solumOptions = solum.map(item => ({
+                value: item.id,
+                label: item.nama_solum
+            }));
+
+            const masalahOptions = masalah.map(item => ({
+                value: item.id,
+                label: item.nama_masalah
+            }));
+
+            const rekomendasiOptions = rekomendasi.map(item => ({
+                value: item.id,
+                label: item.nama_rekomendasi
+            }));
+
+            const rekomendatorOptions = rekomendator.map(item => ({
+                value: item.id,
+                label: item.nama_rekomendator
+            }));
+            const pendampingOptions = pendamping.map(item => ({
+                value: item.id,
+                label: item.nama_jabatan
+            }));
+
+            setJenisTanahOptions(options);
+            setTopografiOptions(topografiOptions);
+            setSolumOptions(solumOptions);
+            setMasalahOptions(masalahOptions);
+            setRekomendasiOptions(rekomendasiOptions);
+            setRekomedatorOptions(rekomendatorOptions);
+            setPendampingOptions(pendampingOptions);
+            
+            
+            
+
+        } catch (errors) {
+            console.error(errors);
+        }
+    };
+    
+    const jenitanah = (options) => {
+        return (
+            <Dropdown
+                value={options.value}
+                options={jenisTanahOptions}
+                onChange={(e) => options.editorCallback(e.value)}
+                placeholder="Select Jenis Tanah"
+            />
+        );
+    };
+
+    const topografi = (options) => {
+        return (
+            <Dropdown
+                value={options.value}
+                options={topografiOptions}
+                onChange={(e) => options.editorCallback(e.value)}
+                placeholder="Select Topografi"
+            />
+        );
+    };
+
+    const solum = (options) => {
+        return (
+            <Dropdown
+                value={options.value}
+                options={solumOptions}
+                onChange={(e) => options.editorCallback(e.value)}
+                placeholder="Select Solum"
+            />
+        );
+    };
+    
+    const masalah = (options) => {
+        return (
+            <Dropdown
+                value={options.value}
+                options={masalahOptions}
+                onChange={(e) => options.editorCallback(e.value)}
+                placeholder="Select Masalah"
+            />
+        );
+    };
+
+    const rekomendasi = (options) => {
+        return (
+            <Dropdown
+                value={options.value}
+                options={rekomendasiOptions}
+                onChange={(e) => options.editorCallback(e.value)}
+                placeholder="Select Rekomendasi"
+            />
+        );
+    };
+
+    const rekomendator = (options) => {
+        return (
+            <Dropdown
+                value={options.value}
+                options={rekomedatorOptions}
+                onChange={(e) => options.editorCallback(e.value)}
+                placeholder="Select Rekomendator"
+            />
+        );
+    };
+    const pendamping = (options) => {
+        return (
+            <Dropdown
+                value={options.value}
+                options={pendampingOptions}
+                onChange={(e) => options.editorCallback(e.value)}
+                placeholder="Select Pendamping"
+            />
+        );
+    };
+    
+    
+    const statusBodyTemplate = (rowData) => {
+        return (
+            <Tag
+                value={rowData.approval_status === "1$1" ? "Verif" : "Unverif"}
+                severity={rowData.approval_status === "1$1" ? "success" : "danger"}
+            ></Tag>
+        );
+    };
+
+    const blokexplode = (rowData) => {
+        const bloks = rowData.blok.split('$'); // Split the string by comma and store the result in an array
+        // return bloks; // Return the array of blocks
+        return (
+          <div className="flex flex-wrap gap-2">
+                {bloks.map((blok, index) => (
+                    <span key={index} className="p-tag p-tag-rounded p-tag-success">{blok}</span>
+                ))}
+            </div>
+        );
+    };
+    
+    const imageBodyTemplate = (rowData) => {
+        const foto = rowData.foto.split('$');
+    
+        return (
+            <div className="flex flex-wrap gap-2">
+                {foto.map((foto, index) => (
+                    <img 
+                        key={index} 
+                        src={`https://rapidresponse.srs-ssms.com/public/images/document/rapidresponse/${foto}`} 
+                        alt={foto} 
+                        width="64px" 
+                        className="shadow-4 cursor-pointer" 
+                        onClick={() => {
+                            setSelectedImage(`https://rapidresponse.srs-ssms.com/public/images/document/rapidresponse/${foto}`);
+                            setImageModalVisible(true);
+                        }}
+                    />
+                ))}
+            </div>
+        );
+    };
+    
 
     return (
         <div className="flex justify-content-center">
             <Dialog
                 visible={isOpen}
                 modal
-                header={headerElement}
-                footer={footerContent}
+                header={`Detail Estate: ${selectedData ? selectedData.estate : "N/A"}`}
+                footer={<Button label="Ok" icon="pi pi-check" onClick={onRequestClose} autoFocus />}
                 style={{ width: "80rem" }}
                 breakpoints={{ "960px": "65vw", "641px": "90vw" }}
                 onHide={onRequestClose}
@@ -118,12 +325,14 @@ export default function Getmodal({ isOpen, onRequestClose, selectedData }) {
                     scrollHeight="500px"
                     style={{ minWidth: "50rem" }}
                     rows={25}
-                    tableStyle={{ minWidth: "50rem" }}
+                    editMode="row"
+                    dataKey="id"
+                    onRowEditComplete={onRowEditComplete}
                 >
-                     <Column
-                        field="status"
+                    <Column
+                        field="approval_status"
                         header="Status"
-                        body={(rowData) => (rowData.status === 0 ?  <Tag severity="success" value="Verif"></Tag> :  <Tag severity="danger" value="Unverif"></Tag>)}
+                        body={statusBodyTemplate}
                         style={{ minWidth: "100px" }}
                     />
                     <Column
@@ -134,12 +343,13 @@ export default function Getmodal({ isOpen, onRequestClose, selectedData }) {
                     <Column
                         field="afdeling"
                         header="Afdeling"
-                        sortable
                         style={{ width: "25%", minWidth: "150px" }}
                     />
                     <Column
                         field="blok"
                         header="Blok"
+                        // editor={(options) => textEditor(options)}
+                        body={blokexplode}
                         style={{ minWidth: "100px" }}
                     />
                     <Column
@@ -148,67 +358,99 @@ export default function Getmodal({ isOpen, onRequestClose, selectedData }) {
                         style={{ minWidth: "150px" }}
                     />
                     <Column
-                        field="jenistanah.nama_jenis_tanah"
-                        header="Jenis Tanah"
-                        style={{ minWidth: "150px" }}
+                        field="jenistanah.id"
+                        header="Jenis tanah"
+                        body={(rowdata) => rowdata.jenistanah.nama_jenis_tanah}
+                        editor={(options) => jenitanah(options)}
+                        style={{ minWidth: "200px" }}
                     />
-                    <Column
-                        field="topografi.nama_topografi"
+
+                     <Column
+                        field="topografi.id"
                         header="Topografi"
-                        style={{ minWidth: "150px" }}
+                        body={(rowdata) => rowdata.topografi.nama_topografi}
+                        editor={(options) => topografi(options)}
+                        style={{ minWidth: "200px" }}
                     />
-                    <Column
-                        field="solum.nama_solum"
+                     <Column
+                        field="solum.id"
                         header="Solum"
-                        style={{ minWidth: "150px" }}
+                        body={(rowdata) => rowdata.solum.nama_solum}
+                        editor={(options) => solum(options)}
+                        style={{ minWidth: "100px" }}
                     />
-                    <Column
+                      <Column
                         field="baris"
                         header="Baris"
-                        style={{ minWidth: "150px" }}
+                        editor={(options) => textEditor(options)}
+                        style={{ minWidth: "100px" }}
                     />
-                    <Column
+                      <Column
                         field="no_pkk"
                         header="No Pokok"
-                        style={{ minWidth: "150px" }}
+                        editor={(options) => textEditor(options)}
+                        style={{ minWidth: "100px" }}
                     />
-                    <Column
+                      <Column
+                        field="pendamping"
+                        header="Pendamping"
+                        editor={(options) => pendamping(options)}
+                        style={{ minWidth: "100px" }}
+                    />
+                        <Column
+                        field="rekomendator"
+                        header="Rekomendator"
+                        sortable
+                        body={(rowdata) => rowdata.nama_rekomendator.nama_lengkap}
+                        editor={(options) => rekomendator(options)}
+                        style={{ minWidth: "300px" }}
+                    />
+                        <Column
                         field="verifikator1"
                         header="Verifikator 1"
-                        style={{ minWidth: "150px" }}
+                        sortable
+                        body={(rowdata) => rowdata.nama_verifikator1.nama_lengkap}
+                        editor={(options) => rekomendator(options)}
+                        style={{ minWidth: "300px" }}
                     />
-                    <Column
+                        <Column
                         field="verifikator2"
                         header="Verifikator 2"
-                        style={{ minWidth: "150px" }}
+                        sortable
+                        body={(rowdata) => rowdata.nama_verifikator2.nama_lengkap}
+                        editor={(options) => rekomendator(options)}
+                        style={{ minWidth: "300px" }}
                     />
-                    <Column
-                        field="Pedamping"
-                        header="Pedamping"
-                        style={{ minWidth: "150px" }}
-                    />
-                    <Column
-                        field="subjek"
-                        header="Subjek"
-                        style={{ minWidth: "150px" }}
-                    />
-                    <Column
-                        field="masalah.nama_masalah"
-                        header="Masalah"
+                        <Column
+                        field="foto"
+                         header="Foto"
+                        body={imageBodyTemplate} 
                         style={{ minWidth: "300px" }}
                     />
                     <Column
-                        field="rekomendasi.nama_rekomendasi"
-                        header="Rekomendasi"
-                        style={{ minWidth: "300px" }}
-                    />
-                    <Column
-                        field="catatan"
-                        header="Catatan"
-                        style={{ minWidth: "150px" }}
+                        rowEditor
+                        headerStyle={{ width: '10%', minWidth: '8rem' }}
+                        bodyStyle={{ textAlign: 'center' }}
                     />
                 </DataTable>
             </Dialog>
+
+            <Dialog
+                visible={imageModalVisible}
+                onHide={() => setImageModalVisible(false)}
+                header="Detail Foto"
+                modal
+                style={{ width: '70vw' }}
+            >
+                {selectedImage && (
+                    <img 
+                        src={selectedImage} 
+                        alt="Full size" 
+                        style={{ width: '100%', height: 'auto' }} 
+                    />
+                )}
+            </Dialog>
+
         </div>
     );
 }

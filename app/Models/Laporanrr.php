@@ -33,4 +33,19 @@ class Laporanrr extends Model
     {
         return $this->belongsTo(Rekomendasi::class, 'rekomendasi', 'id');
     }
+
+    public function nama_rekomendator()
+    {
+        return $this->belongsTo(Pengguna::class, 'rekomendator', 'user_id');
+    }
+
+    public function nama_verifikator1()
+    {
+        return $this->belongsTo(Pengguna::class, 'verifikator1', 'user_id');
+    }
+
+    public function nama_verifikator2()
+    {
+        return $this->belongsTo(Pengguna::class, 'verifikator2', 'user_id');
+    }
 }
