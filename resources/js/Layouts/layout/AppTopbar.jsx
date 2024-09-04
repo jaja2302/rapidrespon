@@ -56,13 +56,13 @@ const AppTopbar = forwardRef((props, ref) => {
                         layoutState.profileSidebarVisible,
                 })}
             >
-                <Link
+                {/* <Link
                     href={route("profile.edit")}
                     className="p-link layout-topbar-button"
                 >
                     <i className="pi pi-user"></i>
                     <span>Profile</span>
-                </Link>
+                </Link> */}
                 <Link
                     href={route("logout")}
                     method="post"

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\Rapidresponsnotification;
 use App\Models\Estate;
 use App\Models\Jabatan;
 use App\Models\Jenistanah;
@@ -198,5 +199,34 @@ class Dashboardcontroller extends Controller
         } else {
             return response()->json(['error' => 'Failed to update data'], 500);
         }
+    }
+
+    public function resend_notif(Request $request)
+    {
+        $id = $request->input('id');
+        $data = Laporanrr::where('id', $id)->first();
+        $verifikator1 = Pengguna::where('user_id', $data['verifikator1'])->first();
+        $verifikator2 = Pengguna::where('user_id', $data['verifikator2'])->first();
+        $blok = explode('$', $request->input('blok'));
+        $blok = implode('-', $blok);
+        $bot_data = [
+            'id' => $data->id,
+            'verifikator1' => $verifikator1->no_hp,
+            'verifikator2' => $verifikator2->no_hp,
+            'nama_verifikator1' => $verifikator1->nama_lengkap,
+            'nama_verifikator2' => $verifikator2->nama_lengkap,
+            'id_verifikator1' => $verifikator1->user_id,
+            'id_verifikator2' => $verifikator2->user_id,
+            'rekomendator' => Pengguna::where('user_id', $data['rekomendator'])->first()->nama_lengkap,
+            'estate'        => $data['est'],
+            'afdeling'      => $data['afd'],
+            'blok'          => $blok,
+            'baris'         => $data['baris'],
+            'masalah'       => Masalah::where('id', $data['masalah'])->first()->nama_masalah,
+            'catatan'       => str_replace("|", ",", $data['catatan']),
+        ];
+        // dd($bot_data);
+        event(new Rapidresponsnotification($bot_data));
+        return response()->json(['success' => 'Notif resend']);
     }
 }

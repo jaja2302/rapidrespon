@@ -43,6 +43,7 @@ Route::middleware('auth')->group(function () {
     Route::get('filterrData', [DashboardController::class, 'filterrData'])->name('filterrData');
     Route::get('getDatainduk', [DashboardController::class, 'getDatainduk'])->name('getDatainduk');
     Route::post('updateData', [DashboardController::class, 'updateData'])->name('updateData');
+    Route::post('resend_notif', [DashboardController::class, 'resend_notif'])->name('resend_notif');
 });
 
 

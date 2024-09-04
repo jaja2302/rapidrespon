@@ -25,6 +25,9 @@ export default function Getmodal({ isOpen, onRequestClose, selectedData }) {
     const [pendampingOptions, setPendampingOptions] = useState([]);
     const [imageModalVisible, setImageModalVisible] = useState(false);
     const [selectedImage, setSelectedImage] = useState(null);
+    const [isPdfLoading, setIsPdfLoading] = useState(false);
+    const [pdfLoadingStates, setPdfLoadingStates] = useState({});
+    const [selectedId, setSelectedId] = useState(null);
 
     useEffect(() => {
         if (selectedData && isOpen) {
@@ -322,6 +325,51 @@ export default function Getmodal({ isOpen, onRequestClose, selectedData }) {
         return option ? option.label : "Label not found"; // Return a default message if no match is found
     };
     
+    const downloadPDF = (rowData) => {
+        return (
+            <Button 
+            onClick={async () => {
+                setPdfLoadingStates(prev => ({ ...prev, [rowData.id]: true }));
+                try {
+                    const response = await axios.get('https://management.srs-ssms.com/api/generate_pdf_rapidresponse', {
+                        params: {
+                            id: rowData.id,
+                            pass: 'j',
+                            email: 'j'
+                        },
+                        responseType: 'json'
+                    });
+    
+                    const base64String = response.data.pdf;
+                    const fileName = response.data.filename;
+    
+                    const byteCharacters = atob(base64String);
+                    const byteNumbers = new Array(byteCharacters.length);
+                    for (let i = 0; i < byteCharacters.length; i++) {
+                        byteNumbers[i] = byteCharacters.charCodeAt(i);
+                    }
+                    const byteArray = new Uint8Array(byteNumbers);
+    
+                    const pdfBlob = new Blob([byteArray], { type: 'application/pdf' });
+                    const link = document.createElement('a');
+                    link.href = URL.createObjectURL(pdfBlob);
+                    link.download = fileName;
+                    link.click();
+    
+                } catch (error) {
+                    console.error("Error generating or downloading PDF:", error);
+                    toast.current.show({ severity: 'error', summary: 'Error', detail: 'Failed to download PDF', life: 3000 });
+                } finally {
+                    setPdfLoadingStates(prev => ({ ...prev, [rowData.id]: false }));
+                }
+            }}
+            icon={pdfLoadingStates[rowData.id] ? "pi pi-spinner pi-spin" : "pi pi-file-pdf"}
+            className="p-button-sm p-button-text" 
+            label={pdfLoadingStates[rowData.id] ? "Loading..." : "PDF"}
+            disabled={pdfLoadingStates[rowData.id]}>
+            </Button>
+        );
+    };
     
     const imageBodyTemplate = (rowData) => {
         const foto = rowData.foto.split('$');
@@ -346,14 +394,30 @@ export default function Getmodal({ isOpen, onRequestClose, selectedData }) {
     };
    
     const accept = () => {
-        toast.current.show({ severity: 'info', summary: 'Confirmed', detail: 'Permintaan Verification di kirim', life: 3000 });
+        console.log(`Accepting ID: ${selectedId}`); // Use the state variable
+        
+        axios.post(route("resend_notif"), {
+            id: selectedId, // Pass the id from state
+        })
+        .then((response) => {
+            toast.current.show({ severity: 'info', summary: 'Saved', detail: 'Notifikasi berhasil di kirim', life: 3000 });
+        })
+        .catch((error) => {
+            toast.current.show({ severity: 'danger', summary: 'error', detail: 'Kesalahan mengirim notifkasi', life: 3000 });
+            console.error(error);
+        });
     };
-
+    
+    
     const reject = () => {
         toast.current.show({ severity: 'warn', summary: 'Rejected', detail: 'Aksi di batalkan', life: 3000 });
     };
-
-    const confirm1 = (event) => {
+    
+    const confirm1 = (event, rowData) => {
+        const id = rowData.id; // Capture the ID here
+        setSelectedId(id); // Store the ID in state
+        console.log(`id confirm1: ${id}`);
+        
         confirmPopup({
             group: 'headless',
             target: event.currentTarget,
@@ -361,10 +425,11 @@ export default function Getmodal({ isOpen, onRequestClose, selectedData }) {
             icon: 'pi pi-exclamation-triangle',
             defaultFocus: 'accept',
             accept,
-            reject
+            reject,
         });
     };
-
+    
+    
 
 
     const resendverification = (rowData, options) => {
@@ -373,17 +438,18 @@ export default function Getmodal({ isOpen, onRequestClose, selectedData }) {
         const isDisabled = isApproved;
          return (
             <Button 
-            onClick={confirm1} 
+            onClick={(event) => confirm1(event, rowData)} 
             icon={icon}
             className="p-button-sm p-button-text" 
             disabled={isDisabled}
-            label="Resend Verif">
+            label="Verif">
             </Button>
          );
-    
     };
+    
 
-
+ 
+    
     return (
         <div className="flex justify-content-center">
             <Dialog
@@ -533,6 +599,7 @@ export default function Getmodal({ isOpen, onRequestClose, selectedData }) {
                         bodyStyle={{ textAlign: 'center' }}
                     />
                     <Column style={{ flex: '0 0 4rem' }} body={resendverification}></Column>
+                    <Column style={{ flex: '0 0 4rem' }} body={downloadPDF}></Column>
                 </DataTable>
             </Dialog>
 
