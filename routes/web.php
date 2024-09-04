@@ -42,6 +42,7 @@ Route::middleware('auth')->group(function () {
     Route::get('detailData', [DashboardController::class, 'detailData'])->name('detailData');
     Route::get('filterrData', [DashboardController::class, 'filterrData'])->name('filterrData');
     Route::get('getDatainduk', [DashboardController::class, 'getDatainduk'])->name('getDatainduk');
+    Route::post('updateData', [DashboardController::class, 'updateData'])->name('updateData');
 });
 
 

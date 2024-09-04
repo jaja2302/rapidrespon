@@ -165,4 +165,38 @@ class Dashboardcontroller extends Controller
         ];
         return response()->json(['data' => $data]);
     }
+
+    public function updateData(Request $request)
+    {
+        $data = $request->input('data');
+        // dd($data);
+        $newdata = $data[0];
+        // dd($newdata['id']);
+        // Attempt to find the model instance
+        $model = Laporanrr::find($newdata['id']);
+
+        // dd($model, $newdata);
+        // Check if the model instance was found
+        if (!$model) {
+            // Handle the case where the model is not found
+            return response()->json(['error' => 'Data not found'], 404);
+        }
+
+        $model->jenis_tanah = $newdata['jenistanah']['id'];
+        $model->topografi = $newdata['topografi']['id'];
+        $model->solum = $newdata['solum']['id'];
+        $model->baris = $newdata['baris'];
+        $model->no_pkk = $newdata['no_pkk'];
+        $model->rekomendator = $newdata['rekomendator'];
+        $model->verifikator1 = $newdata['verifikator1'];
+        $model->verifikator2 = $newdata['verifikator2'];
+        $model->updated_by = auth()->user()->user_id;
+
+        $model->save();
+        if ($model) {
+            return response()->json(['success' => 'Data updated successfully']);
+        } else {
+            return response()->json(['error' => 'Failed to update data'], 500);
+        }
+    }
 }

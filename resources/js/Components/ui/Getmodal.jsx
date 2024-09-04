@@ -15,7 +15,7 @@ export default function Getmodal({ isOpen, onRequestClose, selectedData }) {
     const [error, setError] = useState(null); // State to handle errors
     const [datedata, setDatedata] = useState([]); // State for dropdown options
     const [selectedDate, setSelectedDate] = useState(null); // State for selected date
-  
+    const toast = useRef(null);
     const [jenisTanahOptions, setJenisTanahOptions] = useState([]);
     const [topografiOptions, setTopografiOptions] = useState([]);
     const [solumOptions, setSolumOptions] = useState([]);
@@ -81,14 +81,30 @@ export default function Getmodal({ isOpen, onRequestClose, selectedData }) {
     const onRowEditComplete = (e) => {
         let updatedData = [...detailData];
         let { newData, index } = e;
-
-        updatedData[index] = newData;
-
+    
+        // Update the data in the state immediately
+        updatedData[index] = {
+            ...updatedData[index],
+            ...newData,
+            nama_rekomendator: rekomedatorOptions.find(option => option.value === newData.rekomendator)?.label,
+            nama_verifikator1: rekomedatorOptions.find(option => option.value === newData.verifikator1)?.label,
+            nama_verifikator2: rekomedatorOptions.find(option => option.value === newData.verifikator2)?.label
+        };
+    
         setDetailData(updatedData);
         
-        console.log(updatedData);
-        
+        axios.post(route("updateData"), {
+            data: updatedData,
+        })
+        .then((response) => {
+            toast.current.show({ severity: 'info', summary: 'Saved', detail: 'Data berhasil di edit', life: 3000 });
+        })
+        .catch((error) => {
+            toast.current.show({ severity: 'danger', summary: 'error', detail: 'Kesalahan mengupdate data', life: 3000 });
+            // console.error(error);
+        });
     };
+    
 
     const textEditor = (options) => {
         return <InputText type="text" value={options.value} onChange={(e) => options.editorCallback(e.target.value)} />;
@@ -293,6 +309,19 @@ export default function Getmodal({ isOpen, onRequestClose, selectedData }) {
             </div>
         );
     };
+
+    const getLabel = (rowData) => {
+        const data = rowData.rekomendator;
+
+        // Convert data to a number if it's not already
+        const value = Number(data);
+    
+        const option = rekomedatorOptions.find(option => option.value === value);
+        // console.log(option);
+    
+        return option ? option.label : "Label not found"; // Return a default message if no match is found
+    };
+    
     
     const imageBodyTemplate = (rowData) => {
         const foto = rowData.foto.split('$');
@@ -315,7 +344,7 @@ export default function Getmodal({ isOpen, onRequestClose, selectedData }) {
             </div>
         );
     };
-    const toast = useRef(null);
+   
     const accept = () => {
         toast.current.show({ severity: 'info', summary: 'Confirmed', detail: 'Permintaan Verification di kirim', life: 3000 });
     };
@@ -456,11 +485,15 @@ export default function Getmodal({ isOpen, onRequestClose, selectedData }) {
                         // editor={(options) => pendamping(options)}
                         style={{ minWidth: "100px" }}
                     />
-                        <Column
+                         <Column
                         field="rekomendator"
                         header="Rekomendator"
                         sortable
-                        body={(rowdata) => rowdata.nama_rekomendator.nama_lengkap}
+                        body={(rowData) => {
+                            const value = Number(rowData.rekomendator);
+                            const option = rekomedatorOptions.find(option => option.value === value);
+                            return option ? option.label : "Label not found";
+                        }}
                         editor={(options) => rekomendator(options)}
                         style={{ minWidth: "300px" }}
                     />
@@ -468,7 +501,11 @@ export default function Getmodal({ isOpen, onRequestClose, selectedData }) {
                         field="verifikator1"
                         header="Verifikator 1"
                         sortable
-                        body={(rowdata) => rowdata.nama_verifikator1.nama_lengkap}
+                        body={(rowData) => {
+                            const value = Number(rowData.verifikator1);
+                            const option = rekomedatorOptions.find(option => option.value === value);
+                            return option ? option.label : "Label not found";
+                        }}
                         editor={(options) => rekomendator(options)}
                         style={{ minWidth: "300px" }}
                     />
@@ -476,7 +513,11 @@ export default function Getmodal({ isOpen, onRequestClose, selectedData }) {
                         field="verifikator2"
                         header="Verifikator 2"
                         sortable
-                        body={(rowdata) => rowdata.nama_verifikator2.nama_lengkap}
+                        body={(rowData) => {
+                            const value = Number(rowData.verifikator2);
+                            const option = rekomedatorOptions.find(option => option.value === value);
+                            return option ? option.label : "Label not found";
+                        }}
                         editor={(options) => rekomendator(options)}
                         style={{ minWidth: "300px" }}
                     />
@@ -517,8 +558,8 @@ export default function Getmodal({ isOpen, onRequestClose, selectedData }) {
                     <div className="bg-gray-900 text-white border-round p-3">
                         <span>{message}</span>
                         <div className="flex align-items-center gap-2 mt-3">
-                            <Button ref={acceptBtnRef} label="Save" onClick={() => {accept(); hide();}} className="p-button-sm p-button-outlined"></Button>
-                            <Button ref={rejectBtnRef} label="Cancel" outlined onClick={() => {reject(); hide();}}className="p-button-sm p-button-text"></Button>
+                            <Button ref={acceptBtnRef} label="Kirim" onClick={() => {accept(); hide();}} className="p-button-sm p-button-outlined"></Button>
+                            <Button ref={rejectBtnRef} label="Batal" outlined onClick={() => {reject(); hide();}}className="p-button-sm p-button-text"></Button>
                         </div>
                     </div>
                 }
