@@ -115,8 +115,10 @@ class Dashboardcontroller extends Controller
                 'afdeling',
                 DB::raw("DATE_FORMAT(datetime, '%Y-%m-%d') as date")
             )
-            ->pluck('date')->toArray();
-        // dd($data);
+            ->pluck('date')
+            ->toArray();
+
+        $data = array_unique($data);
         return response()->json(['data' => $data]);
     }
 

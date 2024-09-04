@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState ,useRef} from "react";
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
 import axios from "axios";
@@ -7,7 +7,8 @@ import { Column } from "primereact/column";
 import { Dropdown } from "primereact/dropdown";
 import { InputText } from "primereact/inputtext";
 import { Tag } from "primereact/tag";
-
+import { Toast } from 'primereact/toast';
+import { ConfirmPopup, confirmPopup } from 'primereact/confirmpopup';
 export default function Getmodal({ isOpen, onRequestClose, selectedData }) {
     const [detailData, setDetailData] = useState([]); // State to store API response
     const [loading, setLoading] = useState(false); // State to handle loading state
@@ -248,6 +249,7 @@ export default function Getmodal({ isOpen, onRequestClose, selectedData }) {
                 options={pendampingOptions}
                 onChange={(e) => options.editorCallback(e.value)}
                 placeholder="Select Pendamping"
+                multiple
             />
         );
     };
@@ -262,6 +264,24 @@ export default function Getmodal({ isOpen, onRequestClose, selectedData }) {
         );
     };
 
+    const pendampingtabel = (rowData) => {
+        const pendamping = rowData.pendamping.split('$');
+    
+        // Map pendamping values to their corresponding labels
+        const pendampingLabels = pendamping.map((pendampingValue) => {
+            const option = pendampingOptions.find(option => option.value.toString() === pendampingValue);
+            return option ? option.label : pendampingValue; // If no match is found, fallback to the value itself
+        });
+    
+        return (
+            <div className="flex flex-wrap gap-2">
+                {pendampingLabels.map((label, index) => (
+                    <span key={index} className="p-tag p-tag-rounded p-tag-success">{label}</span>
+                ))}
+            </div>
+        );
+    };
+    
     const blokexplode = (rowData) => {
         const bloks = rowData.blok.split('$'); // Split the string by comma and store the result in an array
         // return bloks; // Return the array of blocks
@@ -295,7 +315,45 @@ export default function Getmodal({ isOpen, onRequestClose, selectedData }) {
             </div>
         );
     };
+    const toast = useRef(null);
+    const accept = () => {
+        toast.current.show({ severity: 'info', summary: 'Confirmed', detail: 'Permintaan Verification di kirim', life: 3000 });
+    };
+
+    const reject = () => {
+        toast.current.show({ severity: 'warn', summary: 'Rejected', detail: 'Aksi di batalkan', life: 3000 });
+    };
+
+    const confirm1 = (event) => {
+        confirmPopup({
+            group: 'headless',
+            target: event.currentTarget,
+            message: 'Apakah anda ingin mengirimkan ulang verification?', 
+            icon: 'pi pi-exclamation-triangle',
+            defaultFocus: 'accept',
+            accept,
+            reject
+        });
+    };
+
+
+
+    const resendverification = (rowData, options) => {
+        const isApproved = rowData.approval_status === "1$1";
+        const icon = isApproved ? 'pi pi-check-square' : 'pi pi-envelope';
+        const isDisabled = isApproved;
+         return (
+            <Button 
+            onClick={confirm1} 
+            icon={icon}
+            className="p-button-sm p-button-text" 
+            disabled={isDisabled}
+            label="Resend Verif">
+            </Button>
+         );
     
+    };
+
 
     return (
         <div className="flex justify-content-center">
@@ -394,7 +452,8 @@ export default function Getmodal({ isOpen, onRequestClose, selectedData }) {
                       <Column
                         field="pendamping"
                         header="Pendamping"
-                        editor={(options) => pendamping(options)}
+                        body={pendampingtabel}
+                        // editor={(options) => pendamping(options)}
                         style={{ minWidth: "100px" }}
                     />
                         <Column
@@ -432,6 +491,7 @@ export default function Getmodal({ isOpen, onRequestClose, selectedData }) {
                         headerStyle={{ width: '10%', minWidth: '8rem' }}
                         bodyStyle={{ textAlign: 'center' }}
                     />
+                    <Column style={{ flex: '0 0 4rem' }} body={resendverification}></Column>
                 </DataTable>
             </Dialog>
 
@@ -450,7 +510,19 @@ export default function Getmodal({ isOpen, onRequestClose, selectedData }) {
                     />
                 )}
             </Dialog>
-
+            <Toast ref={toast} />
+            <ConfirmPopup
+                group="headless"
+                content={({message, acceptBtnRef, rejectBtnRef, hide}) => 
+                    <div className="bg-gray-900 text-white border-round p-3">
+                        <span>{message}</span>
+                        <div className="flex align-items-center gap-2 mt-3">
+                            <Button ref={acceptBtnRef} label="Save" onClick={() => {accept(); hide();}} className="p-button-sm p-button-outlined"></Button>
+                            <Button ref={rejectBtnRef} label="Cancel" outlined onClick={() => {reject(); hide();}}className="p-button-sm p-button-text"></Button>
+                        </div>
+                    </div>
+                }
+            />
         </div>
     );
 }
