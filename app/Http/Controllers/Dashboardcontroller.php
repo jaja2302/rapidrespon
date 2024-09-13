@@ -29,7 +29,9 @@ class Dashboardcontroller extends Controller
         $data = Regional::all();
 
         return Inertia::render('Dashboard', [
-            'data' => $data
+            'data' => $data,
+            'canEdit' => can_edit(),
+            'canApprove' => can_approve(),
         ]);
     }
 
@@ -132,7 +134,7 @@ class Dashboardcontroller extends Controller
         $data = Laporanrr::where('estate', $estate)
             ->where('afdeling', $afdeling)
             ->where('datetime', 'like', '%' . $date . '%')
-            ->with('Jenistanah', 'Topografi', 'Solum', 'Masalah', 'Rekomendasi', 'nama_rekomendator', 'nama_verifikator1', 'nama_verifikator2')
+            ->with('Jenistanah', 'Topografi', 'Solum', 'Masalah_tanah', 'Rekomendasi', 'nama_rekomendator', 'nama_verifikator1', 'nama_verifikator2')
             ->get()->toArray();
 
 
@@ -169,6 +171,9 @@ class Dashboardcontroller extends Controller
 
     public function updateData(Request $request)
     {
+        if (!can_edit()) {
+            return response()->json(['error' => 'Anda tidak memiliki hak akses'], 403);
+        }
         $data = $request->input('data');
         // dd($data);
         $newdata = $data[0];

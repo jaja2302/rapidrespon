@@ -9,7 +9,9 @@ import { InputText } from "primereact/inputtext";
 import { Tag } from "primereact/tag";
 import { Toast } from 'primereact/toast';
 import { ConfirmPopup, confirmPopup } from 'primereact/confirmpopup';
-export default function Getmodal({ isOpen, onRequestClose, selectedData }) {
+
+
+export default function Getmodal({ isOpen, onRequestClose, selectedData ,canEdit,canApprove }) {
     const [detailData, setDetailData] = useState([]); // State to store API response
     const [loading, setLoading] = useState(false); // State to handle loading state
     const [error, setError] = useState(null); // State to handle errors
@@ -28,6 +30,7 @@ export default function Getmodal({ isOpen, onRequestClose, selectedData }) {
     const [isPdfLoading, setIsPdfLoading] = useState(false);
     const [pdfLoadingStates, setPdfLoadingStates] = useState({});
     const [selectedId, setSelectedId] = useState(null);
+    // console.log(canEdit);
 
     useEffect(() => {
         if (selectedData && isOpen) {
@@ -82,6 +85,8 @@ export default function Getmodal({ isOpen, onRequestClose, selectedData }) {
     };
 
     const onRowEditComplete = (e) => {
+        if (!canEdit) return;
+
         let updatedData = [...detailData];
         let { newData, index } = e;
     
@@ -113,22 +118,7 @@ export default function Getmodal({ isOpen, onRequestClose, selectedData }) {
         return <InputText type="text" value={options.value} onChange={(e) => options.editorCallback(e.target.value)} />;
     };
   
-    const afdelingEditor = (options) => {
-        const afdelingOptions = [
-            { label: 'OA', value: 'OA' },
-            { label: 'OB', value: 'OB' },
-            { label: 'OC', value: 'OC' },
-            { label: 'OD', value: 'OD' },
-        ];
-        return (
-            <Dropdown
-                value={options.value}
-                options={afdelingOptions}
-                onChange={(e) => options.editorCallback(e.value)}
-                placeholder="Select Afdeling"
-            />
-        );
-    };
+
 
     const getDatainduk = async () => {
         try {
@@ -307,7 +297,22 @@ export default function Getmodal({ isOpen, onRequestClose, selectedData }) {
         return (
           <div className="flex flex-wrap gap-2">
                 {bloks.map((blok, index) => (
-                    <span key={index} className="p-tag p-tag-rounded p-tag-success">{blok}</span>
+                    <span key={index} className="p-tag p-tag-success">{blok}</span>
+                ))}
+            </div>
+        );
+    };
+    
+    const masalahBodyTemplate = (rowData) => {
+        const masalah = rowData.masalah.split('$');
+        const masalah_labels = masalah.map((masalahValue) => {
+            const option = masalahOptions.find(option => option.value.toString() === masalahValue);
+            return option ? option.label : masalahValue; 
+        });
+        return (
+            <div>
+                 {masalah_labels.map((label, index) => (
+                    <span key={index} className="p-tag p-tag-danger">{label}</span>
                 ))}
             </div>
         );
@@ -331,15 +336,19 @@ export default function Getmodal({ isOpen, onRequestClose, selectedData }) {
             onClick={async () => {
                 setPdfLoadingStates(prev => ({ ...prev, [rowData.id]: true }));
                 try {
-                    const response = await axios.get('https://management.srs-ssms.com/api/generate_pdf_rapidresponse', {
-                        params: {
+                    const response = await axios.get(
+                        'https://management.srs-ssms.com/api/generate_pdf_rapidresponse',
+                        // 'http://127.0.0.1:8000/api/generate_pdf_rapidresponse',
+                        {params: {
                             id: rowData.id,
                             pass: 'j',
                             email: 'j'
                         },
                         responseType: 'json'
                     });
-    
+                    
+                    // console.log(rowData.id);
+                    
                     const base64String = response.data.pdf;
                     const fileName = response.data.filename;
     
@@ -510,6 +519,19 @@ export default function Getmodal({ isOpen, onRequestClose, selectedData }) {
                         header="Datetime"
                         style={{ minWidth: "150px" }}
                     />
+                       <Column
+                        field="subjek"
+                        header="Subjek"
+                        editor={(options) => textEditor(options)}
+                        style={{ minWidth: "150px" }}
+                    />
+                    <Column
+                        field="masalah"
+                        header="Masalah"
+                        body={masalahBodyTemplate}
+                        style={{ minWidth: "200px" }}
+
+                    />
                     <Column
                         field="jenistanah.id"
                         header="Jenis tanah"
@@ -593,11 +615,13 @@ export default function Getmodal({ isOpen, onRequestClose, selectedData }) {
                         body={imageBodyTemplate} 
                         style={{ minWidth: "300px" }}
                     />
-                    <Column
-                        rowEditor
-                        headerStyle={{ width: '10%', minWidth: '8rem' }}
-                        bodyStyle={{ textAlign: 'center' }}
-                    />
+                    {canEdit && (
+                        <Column
+                            rowEditor
+                            headerStyle={{ width: '10%', minWidth: '8rem' }}
+                            bodyStyle={{ textAlign: 'center' }}
+                        />
+                    )}
                     <Column style={{ flex: '0 0 4rem' }} body={resendverification}></Column>
                     <Column style={{ flex: '0 0 4rem' }} body={downloadPDF}></Column>
                 </DataTable>

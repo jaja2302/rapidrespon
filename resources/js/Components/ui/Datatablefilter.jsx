@@ -4,7 +4,7 @@ import { Column } from "primereact/column";
 import { Button } from "primereact/button";
 import Getmodal from "./Getmodal";
 
-export default function Datatablefilter({ data }) {
+export default function Datatablefilter({ data ,canEdit,canApprove}) {
     const [isModalOpen, setIsModalOpen] = useState(false); // Modal visibility state
     const [selectedData, setSelectedData] = useState(null); // State to hold the selected row's data
 
@@ -82,7 +82,9 @@ export default function Datatablefilter({ data }) {
             <Getmodal
                 isOpen={isModalOpen}
                 onRequestClose={closeModal}
-                selectedData={selectedData} // Pass the entire row data
+                selectedData={selectedData} 
+                canEdit = {canEdit}
+                canApprove ={ canApprove}
             />
         </div>
     );

@@ -14,6 +14,7 @@ import { Fieldset } from "primereact/fieldset";
 const Dashboard = (props) => {
     const [selectedOption, setSelectedOption] = useState(null);
     const [tableData, setTableData] = useState([]);
+    
     const [date, setDate] = useState(() => {
         const today = new Date();
         return new Date(today.getFullYear(), today.getMonth(), 1);
@@ -105,7 +106,11 @@ const Dashboard = (props) => {
                     <Toolbar start={startContent} end={endContent} />
                 </div>
             </div>
-            <Datatablefilter data={tableData} />
+            <Datatablefilter
+             data={tableData}
+             canEdit={props.canEdit}
+             canApprove={props.canApprove}
+               />
         </Layout>
     );
     

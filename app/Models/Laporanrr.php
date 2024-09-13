@@ -25,7 +25,7 @@ class Laporanrr extends Model
         return $this->belongsTo(Solum::class, 'solum', 'id');
     }
 
-    public function Masalah()
+    public function Masalah_tanah()
     {
         return $this->belongsTo(Masalah::class, 'masalah', 'id');
     }
