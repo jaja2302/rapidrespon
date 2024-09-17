@@ -9,6 +9,7 @@ import { InputText } from "primereact/inputtext";
 import { Tag } from "primereact/tag";
 import { Toast } from 'primereact/toast';
 import { ConfirmPopup, confirmPopup } from 'primereact/confirmpopup';
+import { MultiSelect } from 'primereact/multiselect';
 
 
 export default function Getmodal({ isOpen, onRequestClose, selectedData ,canEdit,canApprove }) {
@@ -30,16 +31,19 @@ export default function Getmodal({ isOpen, onRequestClose, selectedData ,canEdit
     const [isPdfLoading, setIsPdfLoading] = useState(false);
     const [pdfLoadingStates, setPdfLoadingStates] = useState({});
     const [selectedId, setSelectedId] = useState(null);
+
     // console.log(canEdit);
 
     useEffect(() => {
-        if (selectedData && isOpen) {
+        // Ensure selectedData is valid before making any requests
+        if (selectedData && selectedData.estate && isOpen) {
+            // Clear previous data
             setDatedata([]); // Clear the dropdown options
             setSelectedDate(null); // Clear the selected date
             setDetailData([]); // Clear the detail data
-            setLoading(true);
-            setError(null);
-
+            setLoading(true); // Start loading state
+            setError(null); // Clear any previous errors
+    
             // Fetch new dates based on selectedData
             axios
                 .get(route("filterrData"), {
@@ -52,16 +56,20 @@ export default function Getmodal({ isOpen, onRequestClose, selectedData ,canEdit
                 .then((response) => {
                     const data = response.data.data;
                     setDatedata(Array.isArray(data) ? data : []);
-                    setLoading(false);
+                    setLoading(false); // Set loading to false after data is fetched
                 })
                 .catch((error) => {
                     setError("Failed to load dates");
-                    setLoading(false);
-                    console.error(error);
+                    setLoading(false); // Stop loading on error
+                    console.error(error); // Log error for debugging
                 });
-                getDatainduk();
+    
+            // Optionally wrap getDatainduk() inside another effect or condition
+            getDatainduk();
         }
     }, [selectedData, isOpen]);
+    
+    
 
     const handleSelectChange = async (e) => {
         const selectedValue = e.value;
@@ -100,6 +108,9 @@ export default function Getmodal({ isOpen, onRequestClose, selectedData ,canEdit
         };
     
         setDetailData(updatedData);
+
+        // console.log(updatedData);
+        
         
         axios.post(route("updateData"), {
             data: updatedData,
@@ -158,7 +169,8 @@ export default function Getmodal({ isOpen, onRequestClose, selectedData ,canEdit
 
             const rekomendasiOptions = rekomendasi.map(item => ({
                 value: item.id,
-                label: item.nama_rekomendasi
+                label: item.nama_rekomendasi,
+                masalah_id : item.masalah_id
             }));
 
             const rekomendatorOptions = rekomendator.map(item => ({
@@ -197,6 +209,8 @@ export default function Getmodal({ isOpen, onRequestClose, selectedData ,canEdit
         );
     };
 
+
+
     const topografi = (options) => {
         return (
             <Dropdown
@@ -219,28 +233,32 @@ export default function Getmodal({ isOpen, onRequestClose, selectedData ,canEdit
         );
     };
     
-    const masalah = (options) => {
-        return (
-            <Dropdown
-                value={options.value}
-                options={masalahOptions}
-                onChange={(e) => options.editorCallback(e.value)}
-                placeholder="Select Masalah"
-            />
-        );
-    };
 
-    const rekomendasi = (options) => {
+    // console.log(rekomendasiOptions);
+    const rekomendasiEditor = (options, rowData) => {
+        // Split and convert masalah values to numbers
+        const masalah = rowData.masalah.split('$').map(Number);
+        // console.log(masalah);
+        
+        // Filter rekomendasiOptions to get only those where masalah_id is in masalah array
+        const filteredOptions = rekomendasiOptions.filter(option => masalah.includes(option.masalah_id));
+    
         return (
-            <Dropdown
-                value={options.value}
-                options={rekomendasiOptions}
-                onChange={(e) => options.editorCallback(e.value)}
+            <MultiSelect
+                value={Array.isArray(options.value) ? options.value : []}
+                options={filteredOptions}
+                onChange={(e) => {
+                    options.editorCallback(e.value);
+                }}
+                optionLabel="label"
+                optionValue="value"
                 placeholder="Select Rekomendasi"
             />
         );
     };
-
+    
+    
+    
     const rekomendator = (options) => {
         return (
             <Dropdown
@@ -251,28 +269,36 @@ export default function Getmodal({ isOpen, onRequestClose, selectedData ,canEdit
             />
         );
     };
-    const pendamping = (options) => {
-        return (
-            <Dropdown
-                value={options.value}
-                options={pendampingOptions}
-                onChange={(e) => options.editorCallback(e.value)}
-                placeholder="Select Pendamping"
-                multiple
-            />
-        );
-    };
     
     
     const statusBodyTemplate = (rowData) => {
+        let statusLabel = "Unverif"; // Default status
+        let severity = "danger";     // Default severity
+    
+        switch (rowData.approval_status) {
+            case "1$1":
+                statusLabel = "Telah Terverifikasi";
+                severity = "success";
+                break;
+            case "1$0":
+                statusLabel = "Terverifikasi verifikator satu";
+                severity = "info";
+                break;
+            case "0$1":
+                statusLabel = "Terverifikasi verifikator dua";
+                severity = "info";
+                break;
+            default:
+                statusLabel = "Belum Terverifikasi";
+                severity = "danger";
+                break;
+        }
+    
         return (
-            <Tag
-                value={rowData.approval_status === "1$1" ? "Verif" : "Unverif"}
-                severity={rowData.approval_status === "1$1" ? "success" : "danger"}
-            ></Tag>
+            <Tag value={statusLabel} severity={severity}></Tag>
         );
     };
-
+    
     const pendampingtabel = (rowData) => {
         const pendamping = rowData.pendamping.split('$');
     
@@ -285,7 +311,7 @@ export default function Getmodal({ isOpen, onRequestClose, selectedData ,canEdit
         return (
             <div className="flex flex-wrap gap-2">
                 {pendampingLabels.map((label, index) => (
-                    <span key={index} className="p-tag p-tag-rounded p-tag-success">{label}</span>
+                    <span key={index} className="p-tag p-tag-success">{label}</span>
                 ))}
             </div>
         );
@@ -317,6 +343,30 @@ export default function Getmodal({ isOpen, onRequestClose, selectedData ,canEdit
             </div>
         );
     };
+    const rekomendasiTemplate = (rowData) => {
+        // Ensure rekomendasi is a string
+        let rekomendasiArray = [];
+        if (typeof rowData.rekomendasi === 'string') {
+            rekomendasiArray = rowData.rekomendasi.split('$');
+        } else if (Array.isArray(rowData.rekomendasi)) {
+            rekomendasiArray = rowData.rekomendasi.map(String); // Convert array items to strings
+        }
+    
+        // Map through rekomendasiArray to get labels
+        const rekomendasi_labels = rekomendasiArray.map((rekomendasiValue) => {
+            const option = rekomendasiOptions.find(option => option.value.toString() === rekomendasiValue);
+            return option ? option.label : rekomendasiValue; 
+        });
+    
+        return (
+            <div>
+                {rekomendasi_labels.map((label, index) => (
+                    <span key={index} className="p-tag p-tag-success">{label}</span>
+                ))}
+            </div>
+        );
+    };
+    
 
     const getLabel = (rowData) => {
         const data = rowData.rekomendator;
@@ -401,21 +451,52 @@ export default function Getmodal({ isOpen, onRequestClose, selectedData ,canEdit
             </div>
         );
     };
-   
+    const fetchTableData = () => {
+        axios.get('your-api-endpoint') // Replace with your actual API endpoint
+            .then((response) => {
+                setDetailData(response.data); // Update table data
+            })
+            .catch((error) => {
+                console.error("Error fetching table data:", error);
+            });
+    };
+    
     const accept = () => {
-        console.log(`Accepting ID: ${selectedId}`); // Use the state variable
-        
+        // console.log(`Accepting ID: ${selectedId}`); // Use the state variable
+    
         axios.post(route("resend_notif"), {
             id: selectedId, // Pass the id from state
         })
         .then((response) => {
-            toast.current.show({ severity: 'info', summary: 'Saved', detail: 'Notifikasi berhasil di kirim', life: 3000 });
+            const message = response.data.success || 'Notifikasi berhasil di kirim';
+            
+            // Show success message
+            toast.current.show({
+                severity: 'info',
+                summary: 'Saved',
+                detail: message,
+                life: 3000
+            });
+    
+            // Option 2: Update the specific row data locally (if applicable)
+            const updatedData = detailData.map(item => 
+                item.id === selectedId ? { ...item, approval_status: response.data.status_approve } : item
+            );
+            setDetailData(updatedData);
+    
         })
         .catch((error) => {
-            toast.current.show({ severity: 'danger', summary: 'error', detail: 'Kesalahan mengirim notifkasi', life: 3000 });
+            const errorMessage = error.response?.data?.error || 'Kesalahan mengirim notifkasi';
+            toast.current.show({
+                severity: 'error',
+                summary: 'Error',
+                detail: errorMessage,
+                life: 3000
+            });
             console.error(error);
         });
     };
+    
     
     
     const reject = () => {
@@ -425,12 +506,12 @@ export default function Getmodal({ isOpen, onRequestClose, selectedData ,canEdit
     const confirm1 = (event, rowData) => {
         const id = rowData.id; // Capture the ID here
         setSelectedId(id); // Store the ID in state
-        console.log(`id confirm1: ${id}`);
+        // console.log(`id confirm1: ${id}`);
         
         confirmPopup({
             group: 'headless',
             target: event.currentTarget,
-            message: 'Apakah anda ingin mengirimkan ulang verification?', 
+            message: 'Apakah anda ingin melakukan verification?', 
             icon: 'pi pi-exclamation-triangle',
             defaultFocus: 'accept',
             accept,
@@ -455,8 +536,45 @@ export default function Getmodal({ isOpen, onRequestClose, selectedData ,canEdit
             </Button>
          );
     };
-    
 
+    
+    const [mapsmodalVisible, setMapsmodalVisible] = useState(false);
+    const [mapDetails, setMapDetails] = useState({ lat: null, lon: null });
+    
+    const checkMaps = (rowData, options) => {
+        const lat = rowData.lat;
+        const lon = rowData.lon;
+        return (
+            <Button 
+                onClick={() => {
+                    // Set the latitude and longitude details before rendering the map
+                    setMapDetails({ lat, lon });
+                    setMapsmodalVisible(true); // Show the modal
+                }}
+                icon='pi pi-map'
+                className="p-button-sm p-button-text" 
+                label="Maps">
+            </Button>
+        );
+    };
+    
+    const renderMap = () => {
+        const { lat, lon } = mapDetails; // Destructure the latitude and longitude from state
+        if (!lat || !lon) {
+            return <p>No map data available.</p>;
+        }
+    
+        return (
+            <iframe
+                src={`https://www.google.com/maps?q=${lat},${lon}&z=15&output=embed`}
+                width="100%"
+                height="400"
+                style={{ border: 0 }}
+                allowFullScreen=""
+                loading="lazy"
+            ></iframe>
+        );
+    };
  
     
     return (
@@ -466,9 +584,8 @@ export default function Getmodal({ isOpen, onRequestClose, selectedData ,canEdit
                 modal
                 header={`Detail Estate: ${selectedData ? selectedData.estate : "N/A"}`}
                 footer={<Button label="Ok" icon="pi pi-check" onClick={onRequestClose} autoFocus />}
-                style={{ width: "80rem" }}
-                breakpoints={{ "960px": "65vw", "641px": "90vw" }}
                 onHide={onRequestClose}
+                maximizable style={{ width: '80vw' }}
             >
                 {error && <p className="error">{error}</p>}
                 <Dropdown
@@ -495,7 +612,7 @@ export default function Getmodal({ isOpen, onRequestClose, selectedData ,canEdit
                         field="approval_status"
                         header="Status"
                         body={statusBodyTemplate}
-                        style={{ minWidth: "100px" }}
+                        style={{ minWidth: "150px" }}
                     />
                     <Column
                         field="estate"
@@ -531,6 +648,13 @@ export default function Getmodal({ isOpen, onRequestClose, selectedData ,canEdit
                         body={masalahBodyTemplate}
                         style={{ minWidth: "200px" }}
 
+                    />
+                        <Column
+                        field="rekomendasi"
+                        header="Rekomendasi"
+                        body={rekomendasiTemplate}
+                        editor={(options) => rekomendasiEditor(options, options.rowData)} // Pass options.rowData
+                        style={{ minWidth: '200px' }}
                     />
                     <Column
                         field="jenistanah.id"
@@ -615,6 +739,7 @@ export default function Getmodal({ isOpen, onRequestClose, selectedData ,canEdit
                         body={imageBodyTemplate} 
                         style={{ minWidth: "300px" }}
                     />
+                    <Column style={{ flex: '0 0 4rem' }} body={checkMaps}></Column>
                     {canEdit && (
                         <Column
                             rowEditor
@@ -642,6 +767,15 @@ export default function Getmodal({ isOpen, onRequestClose, selectedData ,canEdit
                     />
                 )}
             </Dialog>
+            <Dialog
+                visible={mapsmodalVisible} // Control modal visibility with state
+                onHide={() => setMapsmodalVisible(false)} // Hide the modal when closing
+                header="Detail Maps"
+                modal
+                style={{ width: '70vw' }}
+                >
+                {renderMap()}  {/* Render the map when modal is opened */}
+            </Dialog>
             <Toast ref={toast} />
             <ConfirmPopup
                 group="headless"
@@ -649,8 +783,8 @@ export default function Getmodal({ isOpen, onRequestClose, selectedData ,canEdit
                     <div className="bg-gray-900 text-white border-round p-3">
                         <span>{message}</span>
                         <div className="flex align-items-center gap-2 mt-3">
-                            <Button ref={acceptBtnRef} label="Kirim" onClick={() => {accept(); hide();}} className="p-button-sm p-button-outlined"></Button>
-                            <Button ref={rejectBtnRef} label="Batal" outlined onClick={() => {reject(); hide();}}className="p-button-sm p-button-text"></Button>
+                            <Button ref={acceptBtnRef} label="Ya" onClick={() => {accept(); hide();}} className="p-button-sm p-button-outlined"></Button>
+                            <Button ref={rejectBtnRef} label="Tidak" outlined onClick={() => {reject(); hide();}}className="p-button-sm p-button-text"></Button>
                         </div>
                     </div>
                 }

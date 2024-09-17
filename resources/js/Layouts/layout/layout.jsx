@@ -15,8 +15,7 @@ import { PrimeReactContext } from "primereact/api";
 // import { usePathname, useSearchParams } from "next/navigation";
 
 const Layout = ({ children }) => {
-    const { layoutConfig, layoutState, setLayoutState } =
-        useContext(LayoutContext);
+    const { layoutConfig, layoutState, setLayoutState } =useContext(LayoutContext);
     const { setRipple } = useContext(PrimeReactContext);
     const topbarRef = useRef(null);
     const sidebarRef = useRef(null);
@@ -33,6 +32,8 @@ const Layout = ({ children }) => {
                 );
 
                 if (isOutsideClicked) {
+                    // console.log('clicked');
+                    
                     hideMenu();
                 }
             },
@@ -44,7 +45,15 @@ const Layout = ({ children }) => {
         hideMenu();
         hideProfileMenu();
     }, [pathname]);
-
+    useEffect(() => {
+        setLayoutState((prevLayoutState) => ({
+            ...prevLayoutState,
+            staticMenuDesktopInactive: true,
+            overlayMenuActive: false,
+            staticMenuMobileActive: false,
+        }));
+    }, []);
+    
     const [
         bindProfileMenuOutsideClickListener,
         unbindProfileMenuOutsideClickListener,

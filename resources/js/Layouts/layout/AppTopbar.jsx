@@ -31,14 +31,14 @@ const AppTopbar = forwardRef((props, ref) => {
                 <span>SSMS</span>
             </Link>
 
-            <button
+            {/* <button
                 ref={menubuttonRef}
                 type="button"
                 className="p-link layout-menu-button layout-topbar-button"
                 onClick={onMenuToggle}
             >
                 <i className="pi pi-bars" />
-            </button>
+            </button> */}
 
             <button
                 ref={topbarmenubuttonRef}

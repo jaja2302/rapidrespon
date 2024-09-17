@@ -85,19 +85,22 @@ class Dashboardcontroller extends Controller
                         // Ensure 'masalah' is treated as an integer
                         $masalah += intval($value['masalah']);
                     }
+                    $subjek[] = $value['subjek'];
                 }
 
                 $result[] = [
                     'estate' => $estate,
+                    'subjek' => implode('$', $subjek),
                     'afdeling' => $afdeling,
                     'masalah' => $masalah,
                     'blok' => $blok,
-                    'date' => $tanggal
+                    'date' => $tanggal,
+                    'date2' => Carbon::parse($request->input('tanggal'))->format('Y M')
                 ];
             }
         }
 
-        // dd($result);
+        // dd($groupedData, $result);
 
         return response()->json(['data' => $result]);
     }
@@ -134,7 +137,7 @@ class Dashboardcontroller extends Controller
         $data = Laporanrr::where('estate', $estate)
             ->where('afdeling', $afdeling)
             ->where('datetime', 'like', '%' . $date . '%')
-            ->with('Jenistanah', 'Topografi', 'Solum', 'Masalah_tanah', 'Rekomendasi', 'nama_rekomendator', 'nama_verifikator1', 'nama_verifikator2')
+            ->with('Jenistanah', 'Topografi', 'Solum', 'Masalah_tanah', 'Rekomendasi_tanah', 'nama_rekomendator', 'nama_verifikator1', 'nama_verifikator2')
             ->get()->toArray();
 
 
@@ -196,6 +199,7 @@ class Dashboardcontroller extends Controller
         $model->rekomendator = $newdata['rekomendator'];
         $model->verifikator1 = $newdata['verifikator1'];
         $model->verifikator2 = $newdata['verifikator2'];
+        $model->rekomendasi = implode('$', $newdata['rekomendasi']);
         $model->updated_by = auth()->user()->user_id;
 
         $model->save();
@@ -209,29 +213,87 @@ class Dashboardcontroller extends Controller
     public function resend_notif(Request $request)
     {
         $id = $request->input('id');
-        $data = Laporanrr::where('id', $id)->first();
-        $verifikator1 = Pengguna::where('user_id', $data['verifikator1'])->first();
-        $verifikator2 = Pengguna::where('user_id', $data['verifikator2'])->first();
-        $blok = explode('$', $request->input('blok'));
-        $blok = implode('-', $blok);
-        $bot_data = [
-            'id' => $data->id,
-            'verifikator1' => $verifikator1->no_hp,
-            'verifikator2' => $verifikator2->no_hp,
-            'nama_verifikator1' => $verifikator1->nama_lengkap,
-            'nama_verifikator2' => $verifikator2->nama_lengkap,
-            'id_verifikator1' => $verifikator1->user_id,
-            'id_verifikator2' => $verifikator2->user_id,
-            'rekomendator' => Pengguna::where('user_id', $data['rekomendator'])->first()->nama_lengkap,
-            'estate'        => $data['est'],
-            'afdeling'      => $data['afd'],
-            'blok'          => $blok,
-            'baris'         => $data['baris'],
-            'masalah'       => Masalah::where('id', $data['masalah'])->first()->nama_masalah,
-            'catatan'       => str_replace("|", ",", $data['catatan']),
-        ];
-        // dd($bot_data);
-        event(new Rapidresponsnotification($bot_data));
-        return response()->json(['success' => 'Notif resend']);
+        $user = auth()->user();
+        $user_id = $user->user_id;
+        $user_jabatan = Jabatan::find($user->id_jabatan);
+
+        $data = Laporanrr::find($id);
+        if (!$data) {
+            return response()->json(['error' => 'No data found'], 404);
+        }
+
+        $data_approv = explode('$', $data->approval_status);
+        $approval_1 = $data_approv[0];
+        $approval_2 = $data_approv[1];
+        $verifikator1 = $data['verifikator1'];
+        $verifikator2 = $data['verifikator2'];
+
+        // Check if user has access
+        if (!in_array($user_id, [$verifikator1, $verifikator2])) {
+            return response()->json(['error' => 'Anda tidak memiliki hak akses'], 403);
+        }
+
+        $status = $data->approval_status;
+
+        // Update approval status based on the user role
+        if ($verifikator1 == $user_id) {
+            if ($approval_1 == '1') {
+                return response()->json(['error' => 'Anda sudah Approval data ini'], 403);
+            }
+            $data->approval_status = "1\$" . $approval_2;
+            $status = "1\$" . $approval_2;
+        } elseif ($verifikator2 == $user_id) {
+            if ($approval_2 == '1') {
+                return response()->json(['error' => 'Anda sudah Approval data ini'], 403);
+            }
+            $data->approval_status = $approval_1 . "\$1";
+            $status = $approval_1 . "\$1";
+        }
+
+        // Save data and return response
+        if ($data->save()) {
+            return response()->json([
+                'success' => 'Data berhasil diapproval',
+                'status_approve' => $status
+            ], 200);
+        }
+
+        return response()->json(['error' => 'Gagal approve data'], 500);
+        // dd($user_id, $user_jabatan, $id);
+
+        // dd($arr_verif);
+
+        // $verifikator1 = Pengguna::where('user_id', $data['verifikator1'])->first();
+        // $verifikator2 = Pengguna::where('user_id', $data['verifikator2'])->first();
+        // $blok = explode('$', $request->input('blok'));
+        // $blok = implode('-', $blok);
+        // $bot_data = [
+        //     'id' => $data->id,
+        //     'verifikator1' => $verifikator1->no_hp,
+        //     'verifikator2' => $verifikator2->no_hp,
+        //     'nama_verifikator1' => $verifikator1->nama_lengkap,
+        //     'nama_verifikator2' => $verifikator2->nama_lengkap,
+        //     'id_verifikator1' => $verifikator1->user_id,
+        //     'id_verifikator2' => $verifikator2->user_id,
+        //     'rekomendator' => Pengguna::where('user_id', $data['rekomendator'])->first()->nama_lengkap,
+        //     'estate'        => $data['est'],
+        //     'afdeling'      => $data['afd'],
+        //     'blok'          => $blok,
+        //     'baris'         => $data['baris'],
+        //     'masalah'       => Masalah::where('id', $data['masalah'])->first()->nama_masalah,
+        //     'catatan'       => str_replace("|", ",", $data['catatan']),
+        // ];
+        // // dd($bot_data);
+        // event(new Rapidresponsnotification($bot_data));
+
+
+        // return response()->json(['success' => 'Notif resend'], 200);
+    }
+
+    public function getRekomendasi(Request $request)
+    {
+        $masalah_id = $request->input('masalah_id');
+
+        dd($masalah_id);
     }
 }

@@ -29,7 +29,7 @@ class Laporanrr extends Model
     {
         return $this->belongsTo(Masalah::class, 'masalah', 'id');
     }
-    public function Rekomendasi()
+    public function Rekomendasi_tanah()
     {
         return $this->belongsTo(Rekomendasi::class, 'rekomendasi', 'id');
     }

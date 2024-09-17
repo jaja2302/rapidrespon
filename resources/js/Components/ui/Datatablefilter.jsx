@@ -30,7 +30,18 @@ export default function Datatablefilter({ data ,canEdit,canApprove}) {
             />
         );
     };
-
+    const subjekdata = (rowData) => {
+        const bloks = rowData.subjek.split('$'); // Split the string by comma and store the result in an array
+        // console.log(rowData);
+        
+        return (
+          <div className="flex flex-wrap gap-2">
+                {bloks.map((blok, index) => (
+                    <span key={index} className="p-tag p-tag-danger">{blok}</span>
+                ))}
+            </div>
+        );
+    };
     return (
         <div className="card">
             {data.length > 0 ? (
@@ -45,18 +56,19 @@ export default function Datatablefilter({ data ,canEdit,canApprove}) {
                         <Column
                             field="estate"
                             header="Estate"
-                            style={{ minWidth: "100px" }}
+                            style={{ minWidth: "10px" }}
                         ></Column>
                         <Column
                             field="afdeling"
                             header="Afdeling"
                             sortable
-                            style={{ width: "25%", minWidth: "150px" }}
+                            style={{ minWidth: "10px" }}
                         ></Column>
                         <Column
-                            field="masalah"
-                            header="Masalah"
-                            style={{ minWidth: "100px" }}
+                            field="subjek"
+                            header="subjek"
+                            body={subjekdata}
+                            style={{ minWidth: "30px" }}
                         ></Column>
                         <Column
                             field="blok"
@@ -64,7 +76,7 @@ export default function Datatablefilter({ data ,canEdit,canApprove}) {
                             style={{ minWidth: "100px" }}
                         ></Column>
                          <Column
-                            field="date"
+                            field="date2"
                             header="Date"
                             style={{ minWidth: "100px" }}
                         ></Column>
